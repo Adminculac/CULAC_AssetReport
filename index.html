@@ -115,6 +115,13 @@ dialog::backdrop{background:rgba(40,10,25,.45)}
 .sync{font-size:.8rem}
 .sel-edit select,.sel-edit input{padding:4px 8px;font-size:.84rem;border-radius:10px;min-width:120px}
 #printArea{display:none}
+.hcard{display:flex;align-items:center;gap:14px;background:#fff;border:2px solid var(--pink-line);border-left:8px solid var(--pink);border-radius:18px;padding:12px 16px;margin-bottom:12px;cursor:pointer;box-shadow:0 4px 12px rgba(93,42,66,.06)}
+.hcard:hover,.hcard:focus{border-color:var(--pink);outline:none;background:#fff8fb}
+.hc-ic{font-size:1.6rem}
+.hc-tx{flex:1;min-width:0}.hc-tx b{color:var(--plum);font-size:1.02rem}
+.hc-sum{font-size:.9rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hc-ed{flex:none;background:var(--plum);color:#fff;border-radius:30px;padding:6px 14px;font-weight:700;font-size:.88rem}
+#dlgHead{max-width:860px}
 #tDisp td:nth-child(3){min-width:220px}
 /* ---------- หลังบ้าน ---------- */
 .tab.bo-go{margin-left:auto;background:var(--plum);color:#fff}
@@ -244,14 +251,10 @@ table.rpt-t tr.grp td{font-weight:700;background:#fff0f5}
 
   <!-- ===== หน้า คัดเลือกจำหน่าย ===== -->
   <section class="page" id="pg-dispose">
-    <div class="box">
-      <h3>📝 หัวรายงาน</h3>
-      <div class="g2">
-        <div class="f"><label>ชื่อรายงาน</label><input type="text" id="sTitle"></div>
-        <div class="f"><label>ปีงบประมาณ</label><select id="sRound"></select></div>
-      </div>
-      <div class="g3" style="margin-top:10px" id="signers"></div>
-      <div class="note" style="margin-top:8px">เลือกรายการได้จากหน้า "ค้นหาครุภัณฑ์" โดยติ๊กช่องหน้ารายการ · ทุกการแก้ไขบันทึกให้อัตโนมัติ</div>
+    <div class="hcard" id="hCard" role="button" tabindex="0" title="กดเพื่อแก้ไขหัวรายงาน">
+      <div class="hc-ic">📝</div>
+      <div class="hc-tx"><b>หัวรายงาน</b><div id="hSum" class="hc-sum"></div></div>
+      <div class="hc-ed">✏️ แก้ไข</div>
     </div>
     <div class="bar">
       <div class="stats" id="dStats"></div>
@@ -328,6 +331,15 @@ table.rpt-t tr.grp td{font-weight:700;background:#fff0f5}
 </main>
 </div>
 
+<dialog id="dlgHead"><div class="dlg-h"><h3>📝 หัวรายงาน</h3><button class="btn light sm" onclick="dlgHead.close()">✕ ปิด</button></div>
+  <div class="dlg-b">
+    <div class="f"><label>ชื่อรายงาน</label><input type="text" id="sTitle"></div>
+    <div class="f" style="margin-top:10px"><label>ปีงบประมาณ</label><select id="sRound"></select></div>
+    <div class="g3" style="margin-top:12px" id="signers"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <span class="note">บันทึกให้อัตโนมัติทุกครั้งที่พิมพ์</span>
+      <button class="btn dark" onclick="dlgHead.close()">✅ เสร็จ</button></div>
+  </div></dialog>
 <dialog id="dlg"><div class="dlg-h"><h3 id="dlgT"></h3><button class="btn light sm" onclick="dlg.close()">✕ ปิด</button></div><div class="dlg-b" id="dlgB"></div></dialog>
 <dialog id="dlgLogin"><div class="dlg-h"><h3>🔒 เข้าสู่ระบบผู้ดูแล</h3><button class="btn light sm" onclick="dlgLogin.close()">✕</button></div>
   <form class="dlg-b" id="frmLogin" method="dialog">
@@ -418,7 +430,7 @@ function defaultSettings(){
   return { title:'บัญชีรายละเอียดครุภัณฑ์ที่ชำรุด เสื่อมสภาพ หรือไม่จำเป็นต้องใช้ ที่เสนอขอจำหน่าย',
     round:'ประจำปีงบประมาณ '+fyDefault(), fy:fyDefault(),
     signers:[{label:'ผู้จัดทำ',name:'นางปาริชาติ ลีอริยะ',pos:'หัวหน้ากลุ่มภารกิจบริหารงานทั่วไปและงานซ่อมบำรุง'},
-             {label:'ผู้ตรวจสอบ',name:'',pos:''},{label:'ผู้อนุมัติ / หัวหน้าหน่วยงาน',name:'',pos:''}] };
+             {label:'ผู้ตรวจสอบ',name:'',pos:''},{label:'ผู้อำนวยการศูนย์สัตว์ทดลอง',name:'',pos:''}] };
 }
 function indexAssets(){
   st.byBc = new Map();
@@ -630,7 +642,14 @@ function showDetail(bc){
 }
 
 /* ---------- หน้าคัดเลือกจำหน่าย ---------- */
+function updateHSum(){
+  const e=$('hSum'); if(!e||!st.settings) return; const S=st.settings;
+  const names=S.signers.map(g=>g.name||'—').join(' / ');
+  e.textContent = `${S.title||'—'} · ปีงบประมาณ ${S.fy||fyDefault()} · ผู้ลงนาม: ${names}`;
+}
 function renderSigners(){
+  st.settings.signers.forEach(g=>{ if (g.label==='ผู้อนุมัติ / หัวหน้าหน่วยงาน') g.label='ผู้อำนวยการศูนย์สัตว์ทดลอง'; });
+  updateHSum();
   $('signers').innerHTML = st.settings.signers.map((s,i)=>`<div class="f"><label>${esc(s.label)}</label>
     <input type="text" data-sg="${i}" data-f="name" value="${esc(s.name)}" placeholder="ชื่อ-นามสกุล">
     <input type="text" data-sg="${i}" data-f="pos" value="${esc(s.pos)}" placeholder="ตำแหน่ง" style="margin-top:5px"></div>`).join('');
@@ -910,8 +929,11 @@ function bind(){
   $('tDisp').addEventListener('change',e=>{ const tr=e.target.closest('tr[data-bc]'); const k=e.target.dataset.e; if(tr&&k){ setSel(tr.dataset.bc,{[k]:e.target.value}); renderDisposeStatsOnly(); } });
   $('tDisp').addEventListener('click',e=>{ if(e.target.dataset.rm){ const bc=e.target.closest('tr').dataset.bc; setSel(bc,{on:false}); renderDispose(); applyFilter(false); } });
   $('signers').addEventListener('input',e=>{ const i=e.target.dataset.sg; if(i!==undefined){ st.settings.signers[i][e.target.dataset.f]=e.target.value; saveLocal('settings'); queueSettings(); } });
-  $('sTitle').oninput=e=>{ st.settings.title=e.target.value; saveLocal('settings'); queueSettings(); };
-  $('sRound').onchange=e=>{ st.settings.fy=+e.target.value; st.settings.round='ประจำปีงบประมาณ '+e.target.value; saveLocal('settings'); queueSettings(); };
+  $('sTitle').oninput=e=>{ st.settings.title=e.target.value; saveLocal('settings'); queueSettings(); updateHSum(); };
+  $('hCard').onclick=()=>$('dlgHead').showModal();
+  $('hCard').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); $('dlgHead').showModal(); } };
+  $('signers').addEventListener('input',updateHSum);
+  $('sRound').onchange=e=>{ st.settings.fy=+e.target.value; st.settings.round='ประจำปีงบประมาณ '+e.target.value; saveLocal('settings'); queueSettings(); updateHSum(); };
   $('btnXlsSearch').onclick=()=>{ if(!st.filtered.length) return toast('ไม่มีรายการ'); exportXlsx(st.filtered,`v27_ทะเบียนครุภัณฑ์_${todayISO()}.xlsx`,false); };
   $('btnXlsDisp').onclick=()=>{ const L=pickedList(); if(!L.length) return toast('ยังไม่ได้เลือกรายการ'); exportXlsx(L,`v27_บัญชีขอจำหน่ายครุภัณฑ์_${todayISO()}.xlsx`,true); };
   $('btnPrintSearch').onclick=printSearch; $('btnPrintDisp').onclick=printDispose;
