@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ทะเบียนครุภัณฑ์ CULAC v27</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --pink:#F06292; --pink2:#F48FB1; --pink-soft:#fff0f5; --pink-line:#f6c6d8;
+  --plum:#5d2a42; --ink:#1f1a24; --ink2:#3d2433;
+  --green:#1b5e20; --green-bg:#e3f4e4; --red:#8e0f2e; --red-bg:#fde3ea;
+  --blue:#0d47a1; --blue-bg:#e3eefc; --amber:#7a4a00; --amber-bg:#fff3d6;
+  --bg:#fef7fb; --card:#ffffff;
+}
+*{box-sizing:border-box;font-family:'Sarabun',system-ui,sans-serif}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5;padding-bottom:60px}
+::placeholder{color:#7a4560;opacity:1}
+button{cursor:pointer}
+.hdr{background:#fff;padding:0 0 26px;position:relative}
+.hdr::after{content:"";position:absolute;left:0;right:0;bottom:0;height:7px;background:linear-gradient(90deg,#E96BA8 0%,#F48FB1 45%,#5FB6E4 70%,#2299D6 100%)}
+.hdr-in{max-width:1500px;margin:0 auto;padding:18px 24px 12px;display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.hdr-logo{height:66px;width:auto;display:block}
+.hdr-div{width:2px;align-self:stretch;background:linear-gradient(#f6c6d8,#bfe1f4);border-radius:2px}
+.hdr-txt{flex:1;min-width:220px}
+.hdr h1{margin:0;font-size:1.6rem;font-weight:700;color:var(--plum);line-height:1.25}
+.hdr h1 .en{display:block;font-size:.78rem;letter-spacing:.14em;color:#1a6fa3;font-weight:700;margin-top:2px}
+.hdr .sub{font-size:.98rem;color:var(--ink2)}
+.hdr .status{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.pill{background:var(--pink-soft);border:1.5px solid var(--pink-line);color:var(--plum);border-radius:30px;padding:4px 14px;font-weight:600;font-size:.86rem;white-space:nowrap}
+.pill.sync{background:#eaf5fc;border-color:#bfe1f4;color:#0d4f7a}
+body.in-bo .hdr::after{background:linear-gradient(90deg,#5d2a42,#7b3a5a)}
+.wrap{max-width:1500px;margin:18px auto 0;padding:0 16px}
+.card{background:var(--card);border-radius:24px;box-shadow:0 10px 26px rgba(93,42,66,.07);padding:20px 22px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;border-bottom:2px solid var(--pink-line);padding-bottom:10px}
+.tab{border:none;background:var(--pink-soft);color:var(--plum);border-radius:30px;padding:8px 18px;font-weight:600;font-size:.95rem}
+.tab.on{background:var(--pink);color:#fff}
+.tab .cnt{background:#fff;color:var(--pink);border-radius:20px;padding:0 8px;margin-left:6px;font-size:.8rem}
+.tab.on .cnt{color:var(--pink)}
+.page{display:none}.page.on{display:block}
+.search-big{width:100%;font-size:1.12rem;padding:13px 20px;border:2px solid var(--pink2);border-radius:40px;outline:none;color:var(--ink)}
+.search-big:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(240,98,146,.18)}
+.staff #tabs,.staff #pSync{display:none}
+.staff .filters{grid-template-columns:1fr;max-width:420px}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px;background:var(--pink-soft);padding:12px 14px;border-radius:18px}
+.f label{display:block;font-size:.8rem;font-weight:700;color:var(--plum);margin-bottom:3px}
+select,input[type=text],input[type=date],input[type=url],textarea{width:100%;border:1.5px solid var(--pink2);border-radius:14px;padding:7px 11px;font-size:.92rem;background:#fff;color:var(--ink)}
+textarea{border-radius:12px}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--pink)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin:14px 0 8px}
+.stats{display:flex;flex-wrap:wrap;gap:8px}
+.stat{background:#fff;border:1.5px solid var(--pink-line);border-radius:14px;padding:6px 12px;font-size:.9rem;color:var(--ink)}
+.stat b{color:var(--plum);font-size:1rem}
+.btn{border:none;border-radius:30px;padding:8px 16px;font-weight:600;font-size:.9rem;background:var(--pink2);color:var(--plum)}
+.btn:hover{background:var(--pink);color:#fff}
+.btn.dark{background:#2b2b2b;color:#fff}.btn.dark:hover{background:#000}
+.btn.green{background:#a5d6a7;color:#123d15}.btn.green:hover{background:#2e7d32;color:#fff}
+.btn.light{background:#f3e5ec;color:var(--plum)}.btn.light:hover{background:#e8cbd9;color:var(--plum)}
+.btn.red{background:#f8c9d5;color:var(--red)}.btn.red:hover{background:var(--red);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:4px 11px;font-size:.82rem}
+.tbl-wrap{border:1px solid var(--pink-line);border-radius:16px;overflow:auto;max-height:68vh;background:#fff}
+table.grid{width:100%;border-collapse:collapse;font-size:.88rem}
+table.grid th{position:sticky;top:0;z-index:2;background:#F8BBD0;color:var(--plum);font-weight:700;padding:10px 8px;text-align:left;white-space:nowrap;user-select:none}
+table.grid th.s{cursor:pointer}
+table.grid th.s:hover{background:#f4a6c3}
+table.grid th .ar{font-size:.75rem;margin-left:3px}
+table.grid td{padding:8px;border-top:1px solid #f7dde8;vertical-align:top;color:var(--ink)}
+table.grid tbody tr{cursor:pointer}
+table.grid tbody tr:hover{background:#fff6fa}
+table.grid tr.picked{background:#ffe4ee}
+table.grid tr.gone td{color:#5c3a48}
+.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ctr{text-align:center}
+.code{font-weight:700;color:#9c1f55;font-variant-numeric:tabular-nums;white-space:nowrap}
+.code2{font-size:.8rem;color:var(--ink2);white-space:nowrap}
+mark{background:#ffe08a;color:var(--ink);padding:0 1px;border-radius:3px}
+.bdg{display:inline-block;border-radius:20px;padding:1px 9px;font-size:.78rem;font-weight:700;white-space:nowrap}
+.bdg.ok{background:var(--green-bg);color:var(--green)}
+.bdg.gone{background:var(--red-bg);color:var(--red)}
+.bdg.sel{background:var(--blue-bg);color:var(--blue)}
+.bdg.yr{background:#fde8f0;color:#8f1d4b}
+.more{text-align:center;padding:12px}
+.empty{padding:40px 16px;text-align:center;color:var(--ink2);font-size:1rem}
+.chk{width:18px;height:18px;accent-color:var(--pink);cursor:pointer}
+.note{font-size:.86rem;color:var(--ink2)}
+.box{background:var(--pink-soft);border-radius:18px;padding:14px 16px;margin-bottom:14px}
+.box h3{margin:0 0 8px;font-size:1.05rem;color:var(--plum)}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.drop{border:2.5px dashed var(--pink2);border-radius:20px;background:#fff8fb;padding:26px;text-align:center}
+.drop.over{background:#ffe4ee}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.kpi div{background:#fff;border-radius:16px;border:1.5px solid var(--pink-line);padding:10px 12px}
+.kpi b{display:block;font-size:1.45rem;color:var(--plum)}
+.kpi .add b{color:var(--green)}.kpi .chg b{color:var(--blue)}.kpi .rem b{color:var(--red)}
+details{margin-top:8px}
+summary{cursor:pointer;font-weight:600;color:var(--plum)}
+.mini{font-size:.82rem}
+.mini td,.mini th{padding:5px 7px}
+.toast{position:fixed;bottom:18px;right:18px;background:var(--plum);color:#fff;padding:10px 18px;border-radius:30px;font-weight:600;font-size:.9rem;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none;z-index:1000;max-width:90vw}
+.toast.show{opacity:1;transform:none}
+.credit{text-align:center;font-size:.82rem;color:var(--plum);margin-top:16px}
+dialog{border:none;border-radius:22px;padding:0;max-width:640px;width:94vw;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(40,10,25,.45)}
+.dlg-h{background:var(--pink2);color:var(--plum);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.dlg-h h3{margin:0;font-size:1.05rem}
+.dlg-b{padding:16px 18px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;font-size:.93rem}
+.kv dt{font-weight:700;color:var(--plum)}.kv dd{margin:0;color:var(--ink)}
+.copy{border:none;background:#f3e5ec;color:var(--plum);border-radius:10px;font-size:.75rem;padding:1px 8px;margin-left:6px}
+.sync{font-size:.8rem}
+.sel-edit select,.sel-edit input{padding:4px 8px;font-size:.84rem;border-radius:10px;min-width:120px}
+#printArea{display:none}
+#tDisp td:nth-child(3){min-width:220px}
+/* ---------- หลังบ้าน ---------- */
+.tab.bo-go{margin-left:auto;background:var(--plum);color:#fff}
+.tab.bo-go:hover{background:#3e1a2c}
+.bo-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:var(--plum);color:#fff;border-radius:18px;padding:12px 16px;margin-bottom:14px}
+.bo-head h2{margin:0;font-size:1.15rem}
+.bo-head .note{color:#fff}
+.bo .tab.on{background:var(--plum);color:#fff}
+.bo-link#lnkLogin{text-decoration:none;font-size:.95rem;opacity:.9}
+.bo-link{background:none;border:none;color:var(--plum);font-weight:700;text-decoration:underline;font-size:.82rem;padding:0;margin-left:6px}
+[hidden]{display:none!important}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:6px}
+.step{display:flex;gap:12px;align-items:flex-start;background:var(--pink-soft);border:2px solid var(--pink-line);border-radius:18px;padding:14px 16px;text-align:left}
+.step.drop{border-style:dashed;border-color:var(--pink2);background:#fff8fb}
+.step .sn{flex:none;width:34px;height:34px;border-radius:50%;background:var(--pink);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:1.05rem}
+.step .sb{flex:1;min-width:0}
+.step b{display:block;color:var(--plum);margin-bottom:6px;font-size:1rem}
+.big-sel{font-size:1.05rem;font-weight:700;padding:9px 12px}
+.ok-file{background:#fff;border:1.5px solid var(--pink-line);border-radius:12px;padding:8px 10px;margin-bottom:8px;color:var(--ink);font-size:.92rem}
+
+/* ---------- มือถือ: ตารางกลายเป็นการ์ด ---------- */
+@media (max-width:760px){
+  .hdr-in{flex-direction:column;align-items:center;text-align:center;gap:10px;padding:14px 16px 10px}
+  .hdr-logo{height:auto;width:min(300px,82vw)}
+  .hdr-div{display:none}
+  .hdr h1{font-size:1.3rem}
+  .hdr .status{justify-content:center}
+  .card{padding:14px 12px;border-radius:18px}
+  .tbl-wrap{max-height:none;border:none;overflow:visible}
+  table.grid.resp thead{display:none}
+  table.grid.resp,table.grid.resp tbody,table.grid.resp tr,table.grid.resp td{display:block;width:100%}
+  table.grid.resp tr{border:1.5px solid var(--pink-line);border-radius:16px;margin-bottom:10px;padding:8px 10px;background:#fff}
+  table.grid.resp tr.picked{background:#ffe4ee}
+  table.grid.resp td{border:none;padding:2px 0;text-align:left!important}
+  table.grid.resp td[data-l]::before{content:attr(data-l) " : ";font-weight:700;color:var(--plum)}
+  table.grid.resp td.hide-m{display:none}
+  .kv{grid-template-columns:1fr}
+  .filters{grid-template-columns:1fr 1fr;padding:10px}
+  .f label{font-size:.75rem}
+}
+
+/* ---------- พิมพ์ A4 ---------- */
+@page{size:A4 landscape;margin:12mm 10mm 14mm 10mm;
+  @bottom-left{content:"ศูนย์สัตว์ทดลอง จุฬาลงกรณ์มหาวิทยาลัย · ระบบทะเบียนครุภัณฑ์ v27";font-family:Sarabun,sans-serif;font-size:8.5pt;color:#000}
+  @bottom-right{content:"หน้า " counter(page) " / " counter(pages);font-family:Sarabun,sans-serif;font-size:8.5pt;color:#000}
+}
+@media print{
+  body{background:#fff;padding:0;font-size:10pt}
+  .app,.toast,dialog{display:none!important}
+  #printArea{display:block}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+.rpt{color:#000}
+.rpt-head{text-align:center;margin-bottom:8px;position:relative;min-height:15mm;padding-top:1mm}
+.rpt-logo{position:absolute;left:0;top:0;height:13mm;width:auto}
+.rpt-line{height:1.2mm;background:linear-gradient(90deg,#E96BA8,#2299D6);margin:3px 0 4px;border-radius:1mm}
+.rpt-org{font-size:12pt;font-weight:700}
+.rpt-title{font-size:13.5pt;font-weight:700}
+.rpt-sub{font-size:10.5pt}
+.rpt-meta{display:flex;justify-content:space-between;font-size:9.5pt;margin:4px 0 6px}
+table.rpt-t{width:100%;border-collapse:collapse;font-size:9pt;table-layout:fixed}
+table.rpt-t th,table.rpt-t td{border:.6pt solid #000;padding:3px 4px;vertical-align:top;color:#000;word-wrap:break-word}
+table.rpt-t th{background:#F8BBD0;font-weight:700;text-align:center;vertical-align:middle;font-size:8.5pt}
+table.rpt-t td[style*="right"]{white-space:nowrap}
+table.rpt-t thead{display:table-header-group}
+table.rpt-t tr{break-inside:avoid;page-break-inside:avoid}
+table.rpt-t tr.tot td{font-weight:700;background:#fde8f0}
+table.rpt-t tr.grp td{font-weight:700;background:#fff0f5}
+.rpt-sign{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px;break-inside:avoid;page-break-inside:avoid;font-size:10.5pt;text-align:center}
+.rpt-sign .ln{margin-top:34px}
+.rpt-note{font-size:9pt;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="hdr">
+  <div class="hdr-in">
+    <img class="hdr-logo" id="logoImg" src="data:image/png;base64,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" alt="CULAC — Chulalongkorn University Laboratory Animal Center">
+    <div class="hdr-div"></div>
+    <div class="hdr-txt">
+      <h1>ทะเบียนครุภัณฑ์ <span class="en">ASSET REGISTER</span></h1>
+      <div class="sub">ศูนย์สัตว์ทดลอง จุฬาลงกรณ์มหาวิทยาลัย</div>
+    </div>
+    <div class="status">
+      <span class="pill" id="pCount">📦 0 รายการ</span>
+      <span class="pill" id="pAsOf">🗓️ ยังไม่มีข้อมูล</span>
+      <span class="pill sync" id="pSync">💾 เก็บในเครื่องนี้</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="card" id="front">
+  <nav class="tabs" id="tabs">
+    <button class="tab on" data-p="search">🔍 ค้นหาครุภัณฑ์</button>
+    <button class="tab adm" data-p="dispose">🗂️ คัดเลือกจำหน่าย / พิมพ์รายงาน <span class="cnt" id="selCnt">0</span></button>
+    <button class="tab adm" data-p="import">📂 อัปโหลดไฟล์</button>
+    <button class="tab adm" data-p="gas">☁️ Google Sheet</button>
+    <button class="tab adm" data-p="backup">🛟 สำรองข้อมูล</button>
+    <button class="tab adm bo-go" id="btnLogout" title="ออกจากโหมดผู้ดูแล">🚪 ออกจากระบบ</button>
+  </nav>
+
+  <!-- ===== หน้า ค้นหา ===== -->
+  <section class="page on" id="pg-search">
+    <input id="q" class="search-big" type="text" autocomplete="off" placeholder="🔍 พิมพ์ชื่อ หรือตัวเลขบางส่วนก็ได้ เช่น 173 หรือ 1902 (เลขครุภัณฑ์ / บาร์โค้ด / รหัสสินค้าคงคลัง)">
+    <div class="filters">
+      <div class="f"><label>📍 ที่ตั้ง</label><select id="fLoc"></select></div>
+      <div class="f adm"><label>📅 ปีงบประมาณที่ได้มา</label><select id="fY1"></select></div>
+      <div class="f adm"><label>⏳ อายุ</label>
+        <select id="fAge"><option value="">ทุกอายุ</option><option value="5">5 ปีขึ้นไป</option><option value="10">10 ปีขึ้นไป</option><option value="15">15 ปีขึ้นไป</option></select></div>
+      <div class="f adm"><label>💰 มูลค่าตามบัญชี</label>
+        <select id="fBook"><option value="">ทั้งหมด</option><option value="le1">ไม่เกิน 1 บาท</option><option value="gt1">มากกว่า 1 บาท</option></select></div>
+      <div class="f adm"><label>📌 แสดง</label>
+        <select id="fStat"><option value="active">ทุกรายการในทะเบียน</option><option value="picked">เฉพาะที่เลือกไว้จำหน่าย</option><option value="disposed">บันทึกจำหน่ายแล้ว</option></select></div>
+    </div>
+    <div class="bar">
+      <div class="stats" id="stats"></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn light" id="btnReset">↺ ล้างตัวกรอง</button>
+        <button class="btn green" id="btnXlsSearch">⬇️ Excel</button>
+        <button class="btn dark" id="btnPrintSearch">🖨️ พิมพ์ผลค้นหา (A4)</button>
+      </div>
+    </div>
+    <div class="tbl-wrap"><table class="grid resp" id="tSearch"><thead></thead><tbody></tbody></table></div>
+    <div class="more" id="more"></div>
+  </section>
+
+  <!-- ===== หน้า คัดเลือกจำหน่าย ===== -->
+  <section class="page" id="pg-dispose">
+    <div class="box">
+      <h3>📝 หัวรายงาน</h3>
+      <div class="g2">
+        <div class="f"><label>ชื่อรายงาน</label><input type="text" id="sTitle"></div>
+        <div class="f"><label>ปีงบประมาณ</label><select id="sRound"></select></div>
+      </div>
+      <div class="g3" style="margin-top:10px" id="signers"></div>
+      <div class="note" style="margin-top:8px">เลือกรายการได้จากหน้า "ค้นหาครุภัณฑ์" โดยติ๊กช่องหน้ารายการ · ทุกการแก้ไขบันทึกให้อัตโนมัติ</div>
+    </div>
+    <div class="bar">
+      <div class="stats" id="dStats"></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <label class="note" style="display:flex;align-items:center;gap:6px"><input type="checkbox" class="chk" id="grpLoc"> แยกกลุ่มตามที่ตั้ง</label>
+        <button class="btn green" id="btnXlsDisp">⬇️ Excel</button>
+        <button class="btn dark" id="btnPrintDisp">🖨️ พิมพ์บัญชีขอจำหน่าย (A4)</button>
+        <button class="btn" id="btnMarkDisp">✅ บันทึกว่าจำหน่ายแล้ว</button>
+        <button class="btn red" id="btnClearSel">✖ ยกเลิกที่เลือกทั้งหมด</button>
+      </div>
+    </div>
+    <div class="tbl-wrap"><table class="grid resp sel-edit" id="tDisp"><thead></thead><tbody></tbody></table></div>
+  </section>
+
+
+
+  <!-- ===== หน้า นำเข้า ===== -->
+  <section class="page bpage adm" id="pg-import">
+    <div class="steps">
+      <div class="step"><div class="sn">1</div><div class="sb"><b>เลือกปีงบประมาณของข้อมูล</b>
+        <select id="impFy" class="big-sel"></select></div></div>
+      <div class="step drop" id="drop"><div class="sn">2</div><div class="sb"><b>เลือกไฟล์ทะเบียนครุภัณฑ์จาก CU-ERP (.xlsx)</b>
+        <div class="note">หรือลากไฟล์มาวางในกรอบนี้</div>
+        <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden>
+        <div style="margin-top:8px"><button class="btn" onclick="document.getElementById('file').click()">📎 เลือกไฟล์</button></div></div></div>
+      <div class="step" id="step3"><div class="sn">3</div><div class="sb"><b>กดยืนยัน</b>
+        <div id="impPreview" class="note">เลือกไฟล์ก่อน แล้วปุ่มยืนยันจะขึ้นตรงนี้</div></div></div>
+    </div>
+    <div class="note" style="color:var(--red);font-weight:700;margin:4px 2px 14px">⚠️ ไฟล์ใหม่จะแทนข้อมูลเดิมทั้งหมด — ถ้าอัปโหลดผิดไฟล์ กด “↩️ ย้อนกลับ” ในตารางด้านล่างได้</div>
+    <div class="box">
+      <h3>🕘 ประวัติการอัปโหลด</h3>
+      <div id="impLog" class="note">ยังไม่มีประวัติ</div>
+    </div>
+    <div class="note" style="margin-top:6px">ไม่มีไฟล์จาก CU-ERP? <button class="bo-link" id="btnTpl">⬇️ ดาวน์โหลดแบบฟอร์ม Excel เปล่า</button></div>
+  </section>
+
+  <!-- ===== หลังบ้าน: ลิงก์ Google Apps Script ===== -->
+  <section class="page bpage adm" id="pg-gas">
+    <div class="box">
+      <h3>☁️ ใช้ข้อมูลร่วมกันทั้งศูนย์ (Google Sheet)</h3>
+      <div class="note">ใส่ URL ของ Google Apps Script (ไฟล์ v25_Code.gs) เพื่อให้ทุกคนเห็นข้อมูลชุดเดียวกัน ถ้าเว้นว่าง ระบบจะเก็บข้อมูลไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น</div>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <input type="url" id="gasUrl" placeholder="https://script.google.com/macros/s/..../exec" style="flex:1;min-width:240px">
+        <button class="btn" id="btnGasSave">บันทึก &amp; ทดสอบ</button>
+        <button class="btn light" id="btnGasPush">⬆️ ส่งข้อมูลในเครื่องขึ้น Sheet</button>
+      </div>
+      <div class="note" id="gasMsg" style="margin-top:6px"></div>
+      <details><summary>วิธีตั้งค่า (ทำครั้งเดียว)</summary>
+        <ol class="note">
+          <li>สร้าง Google Sheet ใหม่ → เมนู ส่วนขยาย → Apps Script → วางโค้ดจากไฟล์ v25_Code.gs แทนของเดิม → บันทึก</li>
+          <li>กด ทำให้ใช้งานได้ → การทำให้ใช้งานได้รายการใหม่ → ประเภท เว็บแอป → เรียกใช้ในฐานะ "ฉัน" → ผู้ที่มีสิทธิ์เข้าถึง "ทุกคน" → ทำให้ใช้งานได้</li>
+          <li>คัดลอก URL ที่ลงท้ายด้วย /exec มาวางในช่องด้านบน → กด บันทึก &amp; ทดสอบ → กด ส่งข้อมูลในเครื่องขึ้น Sheet</li>
+          <li>ให้ทุกคนเห็นข้อมูลอัตโนมัติ: เปิดไฟล์ HTML นี้ด้วย Notepad แก้บรรทัด <b>const DEFAULT_GAS_URL = ''</b> ใส่ URL เดียวกัน แล้วนำขึ้น GitHub Pages</li>
+          <li>บุคลากรเห็นเฉพาะหน้าค้นหา · ผู้ดูแลกด 🔒 ท้ายหน้า แล้วใส่รหัสผู้ดูแล เพื่อเข้าหลังบ้าน</li>
+        </ol>
+      </details>
+    </div>
+  </section>
+
+  <!-- ===== หลังบ้าน: สำรอง / กู้คืน ===== -->
+  <section class="page bpage adm" id="pg-backup">
+    <div class="box">
+      <h3>🛟 สำรอง / กู้คืนข้อมูล</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn green" id="btnBackup">⬇️ ดาวน์โหลดไฟล์สำรอง (.json)</button>
+        <button class="btn light" onclick="document.getElementById('restoreFile').click()">⬆️ กู้คืนจากไฟล์สำรอง</button>
+        <input type="file" id="restoreFile" accept=".json" hidden>
+      </div>
+      <div class="note" style="margin-top:6px">ไฟล์สำรองมีทั้งทะเบียน รายการที่เลือก หมายเหตุ ประวัติการนำเข้า และหัวรายงาน</div>
+    </div>
+  </section>
+</div>
+<div class="credit">👩‍💼 พัฒนาโดย นางปาริชาติ ลีอริยะ หัวหน้ากลุ่มภารกิจบริหารงานทั่วไปและงานซ่อมบำรุง · v27 <button class="bo-link" id="lnkLogin" title="สำหรับผู้ดูแลระบบ">🔒</button></div>
+</main>
+</div>
+
+<dialog id="dlg"><div class="dlg-h"><h3 id="dlgT"></h3><button class="btn light sm" onclick="dlg.close()">✕ ปิด</button></div><div class="dlg-b" id="dlgB"></div></dialog>
+<dialog id="dlgLogin"><div class="dlg-h"><h3>🔒 เข้าสู่ระบบผู้ดูแล</h3><button class="btn light sm" onclick="dlgLogin.close()">✕</button></div>
+  <form class="dlg-b" id="frmLogin" method="dialog">
+    <div class="f"><label>รหัสผู้ดูแล</label><input type="password" id="pwIn" autocomplete="current-password" style="width:100%;border:1.5px solid var(--pink2);border-radius:14px;padding:9px 12px;font-size:1rem"></div>
+    <div class="note" id="pwMsg" style="color:var(--red);min-height:1.4em;margin-top:6px"></div>
+    <div style="text-align:right"><button class="btn dark" type="submit">เข้าสู่ระบบ</button></div>
+  </form></dialog>
+<div class="toast" id="toast"></div>
+<div id="printArea"></div>
+
+<script>
+/* =====================================================================
+   ทะเบียนครุภัณฑ์ CULAC v27
+   - v27: บุคลากรทั่วไปไม่เห็นแถบสี/ป้าย “เลือกจำหน่าย” ของรายการที่ผู้ดูแลคัดเลือกไว้
+   - v26: ผู้ดูแลเข้าสู่ระบบแล้วเห็นเมนูครบในแถบเดียว: ค้นหา · คัดเลือกจำหน่าย/พิมพ์รายงาน · อัปโหลดไฟล์ · Google Sheet · สำรองข้อมูล (ใช้คู่กับ v25_Code.gs)
+   - v25: ใช้คู่กับ v25_Code.gs — ส่งรหัสผู้ดูแลไปตรวจที่ Google ทุกครั้งที่บันทึก
+   - v24: เข้าหลังบ้านด้วยรหัสผู้ดูแล (เก็บเป็นค่า hash ไม่เก็บรหัสจริงในไฟล์) แทนการต่อท้ายลิงก์ ?admin=1
+   - v23: ทำให้ง่ายขึ้น · ปีงบประมาณของข้อมูล 2569–2579 · อัปโหลด 3 ขั้น · หน้าค้นหาบุคลากรเหลือช่องค้นหา + ที่ตั้ง
+   - v22: บุคลากรไม่เห็นปุ่มหลังบ้าน (โหมดผู้ดูแลเปิดเฉพาะลิงก์ ?admin=1) · นำเข้าไฟล์ใหม่ = แทนที่ข้อมูลเดิมทั้งหมด พร้อมย้อนกลับได้ 1 ครั้ง
+   - v21: ใส่โลโก้ CULAC ที่หัวระบบและหัวรายงาน A4
+   - v20: ย้าย “นำเข้าทะเบียน” และ “ลิงก์ GAS / สำรองข้อมูล” ไปอยู่หลังบ้าน (เฉพาะผู้ดูแล)
+   - ค้นหาได้ทุกคน (ชื่อ / เลขครุภัณฑ์ / บาร์โค้ด / รหัสสินค้าคงคลัง)
+   - ผู้ดูแล: นำเข้าทะเบียนรายปี (เทียบของเดิม), คัดเลือกจำหน่าย, พิมพ์ A4
+   - เก็บข้อมูล: Google Sheet (ถ้าตั้ง URL) + สำเนาในเบราว์เซอร์
+   ===================================================================== */
+const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbyjxSNs1SuFXCDT8dBTm3fdtcT_EVlwAjvWK5S-ee2hyd4YqHh8-myru70_41ArYrdyrw/exec';
+/* รหัสผู้ดูแล: เก็บเฉพาะค่า hash (SHA-256) ไม่เก็บรหัสจริงในไฟล์ · เปลี่ยนรหัสได้โดยให้ผู้พัฒนาสร้างค่า hash ใหม่ */
+const ADMIN_HASH = '36a4ca4f74ef29a8122c5f5b1776daa6351b03584d7aaa2d77e4d2d376e47918';
+const AUTH_KEY = 'culac_asset_admin_ok', AUTH_PW = 'culac_asset_admin_key';
+function adminKey(){ try{ return sessionStorage.getItem(AUTH_PW)||''; }catch(e){ return ''; } }
+async function sha256(t){ const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+function isAuthed(){ try{ return sessionStorage.getItem(AUTH_KEY)===ADMIN_HASH; }catch(e){ return false; } }   // ← ใส่ URL Apps Script (/exec) ที่นี่ เพื่อให้ทุกคนเห็นข้อมูลชุดเดียวกัน
+const VER = 'v27';
+const LS = {assets:'culac_asset_v19_assets', sel:'culac_asset_v19_sel', settings:'culac_asset_v19_settings',
+            log:'culac_asset_v19_log', gas:'culac_asset_v19_gas', meta:'culac_asset_v19_meta'};
+const TM = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const TMF = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const REASONS = ['ชำรุด','เสื่อมสภาพ','สูญไป','ไม่จำเป็นต้องใช้ในหน่วยงานต่อไป'];
+const METHODS = ['ขาย','แลกเปลี่ยน','โอน','แปรสภาพหรือทำลาย'];
+const PAGE = 200;
+const FY_LIST = Array.from({length:11},(_,i)=>2569+i);   // ปีงบประมาณ 2569–2579
+function fyDefault(){ const y=fiscalYearBE()-1;   /* ทะเบียนที่ export หลังปิดปีงบ = ข้อมูลปีงบที่เพิ่งจบ */ return Math.min(Math.max(y,FY_LIST[0]),FY_LIST[FY_LIST.length-1]); }
+function fyOptions(sel){ return FY_LIST.map(y=>`<option value="${y}" ${+sel===y?'selected':''}>ปีงบประมาณ ${y}</option>`).join(''); }
+const val = id => { const e=document.getElementById(id); return e?e.value:''; };
+
+const $ = id => document.getElementById(id);
+const st = { assets:[], byBc:new Map(), sel:{}, settings:null, log:[], meta:{asOf:'',updated:''},
+  filtered:[], sort:{key:'bc',dir:1}, shown:PAGE, admin:false, gas:'', pending:null };
+
+/* ---------- ตัวช่วยพื้นฐาน ---------- */
+const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = v => { if (typeof v === 'number') return v; const n = parseFloat(String(v ?? '').replace(/[,\s฿]/g,'')); return isNaN(n) ? 0 : n; };
+const fmt = v => num(v).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtI = v => num(v).toLocaleString('th-TH');
+const digits = s => String(s ?? '').replace(/\D/g,'');
+function toast(m, ms=2200){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),ms); }
+function codeStr(v){ if (v===null||v===undefined) return ''; if (typeof v==='number') return Math.round(v).toLocaleString('fullwide',{useGrouping:false}); return String(v).trim(); }
+function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function thaiFull(iso){ if(!iso) return '-'; const [y,m,d]=iso.slice(0,10).split('-').map(Number); return `${d} ${TMF[m-1]} ${y+543}`; }
+function fiscalYearBE(){ const d=new Date(); return d.getFullYear()+543+(d.getMonth()>=9?1:0); }
+
+/* วันที่: รับได้ทั้ง serial ของ Excel, "4 มิ.ย. 58", "2015-06-04", "04.06.2015" → {disp, sort(yyyymmdd ค.ศ.)} */
+function parseDate(v){
+  if (v===null||v===undefined||v==='') return {disp:'-',sort:0};
+  let y,m,d;
+  if (typeof v==='number' && v>1000 && v<90000){ const dt=new Date(Date.UTC(1899,11,30)+Math.round(v)*86400000); y=dt.getUTCFullYear(); m=dt.getUTCMonth(); d=dt.getUTCDate(); }
+  else if (v instanceof Date){ y=v.getFullYear(); m=v.getMonth(); d=v.getDate(); }
+  else {
+    const s=String(v).trim(); let r;
+    if ((r=s.match(/^(\d{1,2})\s*([ก-๙.]+)\s*(\d{2,4})$/))){
+      const mk=r[2].replace(/[.\s]/g,''); m=TM.findIndex(x=>x.replace(/\./g,'')===mk);
+      if (m<0) m=TMF.findIndex(x=>x===mk);
+      d=+r[1]; y=+r[3]; if (y<100) y+=2500; if (y>2400) y-=543;
+    } else if ((r=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))){ y=+r[1]; m=+r[2]-1; d=+r[3]; if (y>2400) y-=543; }
+    else if ((r=s.match(/^(\d{1,2})[.\/](\d{1,2})[.\/](\d{2,4})$/))){ d=+r[1]; m=+r[2]-1; y=+r[3]; if (y<100) y+=2500; if (y>2400) y-=543; }
+    else return {disp:s,sort:0};
+  }
+  if (m===undefined||m<0||isNaN(y)) return {disp:String(v),sort:0};
+  return {disp:`${d} ${TM[m]} ${String(y+543).slice(-2)}`, sort:y*10000+(m+1)*100+d};
+}
+function sortToFull(s){ if(!s) return '-'; const y=Math.floor(s/10000), m=Math.floor(s/100)%100, d=s%100; return `${d} ${TMF[m-1]} ${y+543}`; }
+function ageYears(s){ if(!s) return null; const y=Math.floor(s/10000), m=Math.floor(s/100)%100, d=s%100; return (Date.now()-new Date(y,m-1,d).getTime())/(365.25*86400000); }
+
+/* ---------- ข้อมูล ---------- */
+function defaultSettings(){
+  return { title:'บัญชีรายละเอียดครุภัณฑ์ที่ชำรุด เสื่อมสภาพ หรือไม่จำเป็นต้องใช้ ที่เสนอขอจำหน่าย',
+    round:'ประจำปีงบประมาณ '+fyDefault(), fy:fyDefault(),
+    signers:[{label:'ผู้จัดทำ',name:'นางปาริชาติ ลีอริยะ',pos:'หัวหน้ากลุ่มภารกิจบริหารงานทั่วไปและงานซ่อมบำรุง'},
+             {label:'ผู้ตรวจสอบ',name:'',pos:''},{label:'ผู้อนุมัติ / หัวหน้าหน่วยงาน',name:'',pos:''}] };
+}
+function indexAssets(){
+  st.byBc = new Map();
+  for (const a of st.assets){
+    a._s = [a.bc,a.asset,a.inv,a.name,a.loc,a.room,a.year,a.unit,a.date].join(' ').toLowerCase();
+    a._d = ' '+digits(a.bc)+' '+digits(a.asset)+' '+digits(a.inv)+' ';
+    a._t = ' '+[a.name,a.loc,a.room,a.unit,a.year].join(' ').toLowerCase()+' ';
+    st.byBc.set(a.bc, a);
+  }
+}
+function saveLocal(what){
+  if (!what || what.includes('assets')) lsSet(LS.assets, st.assets.map(stripPriv));
+  if (!what || what.includes('sel')) lsSet(LS.sel, st.sel);
+  if (!what || what.includes('settings')) lsSet(LS.settings, st.settings);
+  if (!what || what.includes('log')) lsSet(LS.log, st.log);
+  if (!what || what.includes('meta')) lsSet(LS.meta, st.meta);
+}
+function stripPriv(a){ const o={}; for (const k in a) if (k[0]!=='_') o[k]=a[k]; return o; }
+
+/* ย้ายข้อมูลจากเวอร์ชันเดิม (v18) ถ้ามี */
+function migrateV18(){
+  try{
+    const old = JSON.parse(localStorage.getItem('inventory_cached_v18')||'null');
+    if (!Array.isArray(old) || !old.length) return false;
+    const oldSel = JSON.parse(localStorage.getItem('inventory_selection_v18')||'{}');
+    st.assets = old.map(o=>{ const asset=codeStr(o.id); const dt=parseDate(o.transfer_date);
+      return {bc:asset.length===12?asset+'0000':asset, asset, inv:'', name:o.name||'', year:String(o.year||''), qty:num(o.qty), unit:o.unit||'',
+        date:dt.disp, dsort:dt.sort, loc:o.location||'', room:o.room||'', acq:0, book:num(o.book_value), status:'active',
+        firstImport:todayISO(), lastImport:todayISO(), disposedDate:'', disposedNote:''}; });
+    for (const [k,v] of Object.entries(oldSel)){
+      const bc = k.length===12 ? k+'0000' : k;
+      if (v && (v.selected || v.remark)) st.sel[bc] = {on:!!v.selected, reason:'', method:'', remark:[v.remark,v.location,v.room].filter(Boolean).join(' · '), t:Date.now()};
+    }
+    st.meta.asOf=''; st.log.push({t:new Date().toISOString(), file:'ย้ายข้อมูลจากเวอร์ชันเดิม (v18)', total:st.assets.length, added:st.assets.length, changed:0, removed:0, back:0});
+    return true;
+  }catch(e){ return false; }
+}
+
+/* ---------- Google Sheet ---------- */
+async function gasLoad(){
+  if (!st.gas) return false;
+  setSync('⏳ กำลังโหลดจาก Google Sheet…');
+  try{
+    const r = await fetch(st.gas+'?action=load&t='+Date.now());
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error||'โหลดไม่สำเร็จ');
+    if (Array.isArray(j.assets) && j.assets.length){
+      st.assets = j.assets; st.sel = j.sel||{}; st.log = j.log||[]; st.meta = j.meta||st.meta;
+      if (j.settings) st.settings = Object.assign(defaultSettings(), j.settings);
+      indexAssets(); saveLocal(); refreshAll();
+    }
+    setSync('☁️ เชื่อม Google Sheet แล้ว');
+    return true;
+  }catch(e){ setSync('⚠️ เชื่อม Sheet ไม่ได้ — ใช้ข้อมูลในเครื่อง'); console.warn(e); return false; }
+}
+async function gasPost(payload){
+  if (!st.gas) return true;
+  setSync('⏳ กำลังบันทึกขึ้น Sheet…');
+  try{
+    const r = await fetch(st.gas,{method:'POST',body:JSON.stringify(Object.assign({key:adminKey()},payload))});
+    const j = await r.json(); if (!j.ok){ if (j.msg){ setSync('⚠️ '+j.msg); toast('⚠️ '+j.msg,4000); return false; } throw new Error(j.error); }
+    setSync('☁️ บันทึกขึ้น Sheet แล้ว'); return true;
+  }catch(e){ setSync('⚠️ บันทึกขึ้น Sheet ไม่สำเร็จ (เก็บในเครื่องไว้แล้ว)'); toast('⚠️ บันทึกขึ้น Google Sheet ไม่สำเร็จ ข้อมูลยังอยู่ในเครื่องนี้',3500); return false; }
+}
+function setSync(t){ $('pSync').textContent = t; }
+let selQueue = {}, selTimer = null;
+function queueSel(bc){
+  selQueue[bc] = st.sel[bc] || null;
+  clearTimeout(selTimer);
+  selTimer = setTimeout(()=>{ const items=selQueue; selQueue={}; gasPost({action:'saveSel', items}); }, 700);
+}
+let setTimer=null;
+function queueSettings(){ clearTimeout(setTimer); setTimer=setTimeout(()=>gasPost({action:'saveSettings', settings:st.settings}),900); }
+async function pushAll(){ return gasPost({action:'saveAll', assets:st.assets.map(stripPriv), sel:st.sel, settings:st.settings, log:st.log, meta:st.meta}); }
+
+/* ---------- การเลือกเพื่อจำหน่าย ---------- */
+function setSel(bc, patch){
+  const cur = st.sel[bc] || {on:false,reason:'',method:'',remark:''};
+  Object.assign(cur, patch, {t:Date.now()});
+  if (!cur.on && !cur.remark && !cur.reason && !cur.method) delete st.sel[bc]; else st.sel[bc]=cur;
+  saveLocal('sel'); queueSel(bc); updateSelCount();
+}
+const isPicked = bc => !!(st.sel[bc] && st.sel[bc].on);
+function pickedList(){ return st.assets.filter(a=>isPicked(a.bc)); }
+function updateSelCount(){ if ($('selCnt')) $('selCnt').textContent = pickedList().length; }
+
+/* ---------- ค้นหา / กรอง ---------- */
+function fillFilterOptions(){
+  const locs = new Map(), years = new Set();
+  for (const a of st.assets){ const l=a.loc||''; locs.set(l,(locs.get(l)||0)+1); if (a.year) years.add(a.year); }
+  const keepL=$('fLoc').value, k1=val('fY1');
+  $('fLoc').innerHTML = '<option value="*">ทุกที่ตั้ง</option>' + [...locs.entries()].sort((a,b)=>a[0].localeCompare(b[0],'th'))
+    .map(([l,c])=>`<option value="${l?esc(l):'__none__'}">${l?esc(l):'(ไม่ระบุที่ตั้ง)'} — ${fmtI(c)}</option>`).join('');
+  const ys=[...years].sort();
+  if ($('fY1')){ $('fY1').innerHTML = '<option value="">ทุกปี</option>'+ys.map(y=>`<option>${esc(y)}</option>`).join(''); $('fY1').value=k1; }
+  $('fLoc').value = [...$('fLoc').options].some(o=>o.value===keepL)?keepL:'*';
+}
+function tokens(){ return $('q').value.trim().toLowerCase().split(/\s+/).filter(Boolean); }
+function applyFilter(resetPage=true){
+  const toks = tokens();
+  const loc=$('fLoc').value, y1=val('fY1'), y2=y1, age=+val('fAge')||0, bk=val('fBook'), stt=val('fStat')||'active';
+  st.filtered = st.assets.filter(a=>{
+    if (stt==='active' && a.status!=='active') return false;
+    if (stt==='disposed' && a.status!=='disposed') return false;
+    if (stt==='picked' && !isPicked(a.bc)) return false;
+    if (loc==='__none__'){ if (a.loc) return false; }
+    else if (loc && loc!=='*' && (a.loc||'')!==loc) return false;
+    if (y1 && (+a.year||0) < +y1) return false;
+    if (y2 && (+a.year||0) > +y2) return false;
+    if (age){ const g=ageYears(a.dsort); if (g===null||g<age) return false; }
+    if (bk==='le1' && num(a.book)>1) return false;
+    if (bk==='gt1' && num(a.book)<=1) return false;
+    for (const t of toks){
+      if (/^[\d\-\s.]+$/.test(t)){ const dg=digits(t);
+        if (dg.length<3){ if (!new RegExp('(^|[^\\d])'+dg+'([^\\d]|$)').test(a._t)) return false; }   /* ตัวเลข 1–2 หลัก เช่น ชั้น 3 → ค้นเฉพาะชื่อ/ที่ตั้ง */
+        /* ตั้งแต่ 3 หลัก → ค้นแบบบางส่วนในเลขครุภัณฑ์ / บาร์โค้ด / รหัสสินค้าคงคลัง / ชื่อ */
+        else if (!a._d.includes(dg) && !a._s.includes(t)) return false; }
+      else if (!a._s.includes(t)) return false;
+    }
+    return true;
+  });
+  sortFiltered();
+  /* ค้นด้วยตัวเลข: รายการที่เลขขึ้นต้นด้วยตัวเลขที่พิมพ์ ขึ้นก่อน */
+  const nums = toks.filter(t=>/^[\d\-\s.]+$/.test(t)).map(digits).filter(d=>d.length>=3);
+  if (nums.length && st.sort.key==='bc' && st.sort.dir===1){
+    const starts = a => nums.some(d => [a.asset,a.bc,a.inv].some(c => digits(c).startsWith(d)));
+    const top=[], rest=[]; for (const a of st.filtered) (starts(a)?top:rest).push(a); st.filtered = top.concat(rest);
+  }
+  if (resetPage) st.shown = PAGE;
+  renderSearch();
+}
+function sortFiltered(){
+  const {key,dir}=st.sort;
+  const val = a => key==='date'?a.dsort : key==='acq'||key==='book'||key==='qty'?num(a[key]) : key==='year'?(+a.year||0) : String(a[key]||'');
+  st.filtered.sort((a,b)=>{ const x=val(a), y=val(b); const c = (typeof x==='number') ? x-y : x.localeCompare(y,'th'); return (c||a.bc.localeCompare(b.bc))*dir; });
+}
+function hl(text, toks){
+  let s = esc(text); if (!toks.length || !text) return s;
+  const words = toks.filter(t=>!/^[\d\-\s.]+$/.test(t) || t.length>=3).map(t=>esc(t).replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+  if (!words.length) return s;
+  try{ return s.replace(new RegExp('('+words.join('|')+')','gi'),'<mark>$1</mark>'); }catch(e){ return s; }
+}
+const COLS = [
+  {k:'bc',t:'เลขครุภัณฑ์ / บาร์โค้ด',s:1},{k:'inv',t:'รหัสสินค้าคงคลัง',s:1},{k:'name',t:'รายการ',s:1},{k:'year',t:'ปีงบ',s:1},
+  {k:'qty',t:'จำนวน',s:1},{k:'date',t:'วันที่ได้มา',s:1},{k:'loc',t:'ที่ตั้ง',s:1},{k:'acq',t:'มูลค่าการได้มา',s:1},{k:'book',t:'มูลค่าตามบัญชี',s:1},{k:'status',t:'สถานะ',s:1}];
+function renderSearch(){
+  const th = $('tSearch').querySelector('thead'), tb=$('tSearch').querySelector('tbody');
+  const ar = k => st.sort.key===k ? `<span class="ar">${st.sort.dir>0?'▲':'▼'}</span>` : '';
+  th.innerHTML = '<tr>'+(st.admin?'<th class="ctr" title="เลือกทั้งหมดที่แสดงผล"><input type="checkbox" class="chk" id="chkAll"></th>':'')+
+    '<th class="ctr">#</th>'+COLS.map(c=>`<th class="${c.s?'s':''} ${['acq','book','qty'].includes(c.k)?'num':''}" data-k="${c.k}">${c.t}${ar(c.k)}</th>`).join('')+'</tr>';
+  const toks = tokens();
+  const rows = st.filtered.slice(0, st.shown);
+  if (!st.assets.length){ tb.innerHTML = `<tr><td colspan="13" class="empty">ยังไม่มีข้อมูลทะเบียน</td></tr>`; }
+  else if (!rows.length){ tb.innerHTML = `<tr><td colspan="13" class="empty">ไม่พบรายการที่ตรงกับคำค้นหรือตัวกรอง</td></tr>`; }
+  else tb.innerHTML = rows.map((a,i)=>{
+    const pk=st.admin && isPicked(a.bc);
+    const sub = a.bc && a.bc.slice(-4)!=='0000' ? ` <span class="bdg sel">ชิ้นส่วนที่ ${+a.bc.slice(-4)}</span>` : '';
+    return `<tr data-bc="${esc(a.bc)}" class="${pk?'picked':''} ${a.status==='disposed'?'gone':''}">
+      ${st.admin?`<td class="ctr hide-m0"><input type="checkbox" class="chk pick" data-bc="${esc(a.bc)}" ${pk?'checked':''} ${a.status==='disposed'?'disabled':''}></td>`:''}
+      <td class="ctr hide-m">${i+1}</td>
+      <td data-l="เลขครุภัณฑ์"><div class="code">${hl(a.asset,toks)}${sub}</div><div class="code2">${hl(a.bc,toks)}</div></td>
+      <td data-l="รหัสสินค้าคงคลัง"><span class="code2">${a.inv?hl(a.inv,toks):'-'}</span></td>
+      <td data-l="รายการ"><b>${hl(a.name,toks)}</b>${a.room?`<div class="code2">ห้อง ${esc(a.room)}</div>`:''}</td>
+      <td data-l="ปีงบ"><span class="bdg yr">${esc(a.year||'-')}</span></td>
+      <td data-l="จำนวน" class="num">${fmtI(a.qty)} ${esc(a.unit||'')}</td>
+      <td data-l="วันที่ได้มา" style="white-space:nowrap">${esc(a.date||'-')}</td>
+      <td data-l="ที่ตั้ง">${a.loc?hl(a.loc,toks):'-'}</td>
+      <td data-l="มูลค่าการได้มา" class="num">${fmt(a.acq)}</td>
+      <td data-l="มูลค่าตามบัญชี" class="num">${fmt(a.book)}</td>
+      <td data-l="สถานะ">${a.status==='disposed'?'<span class="bdg gone">จำหน่ายแล้ว</span>':'<span class="bdg ok">อยู่ในทะเบียน</span>'}${pk?' <span class="bdg sel">เลือกจำหน่าย</span>':''}</td>
+    </tr>`;}).join('');
+  const rest = st.filtered.length - rows.length;
+  $('more').innerHTML = rest>0 ? `<button class="btn light" id="btnMore">แสดงเพิ่มอีก ${fmtI(Math.min(rest,PAGE))} รายการ (เหลือ ${fmtI(rest)})</button>` : '';
+  const sumA=st.filtered.reduce((s,a)=>s+num(a.acq),0), sumB=st.filtered.reduce((s,a)=>s+num(a.book),0);
+  $('stats').innerHTML = `<span class="stat">พบ <b>${fmtI(st.filtered.length)}</b> รายการ</span><span class="stat">มูลค่าการได้มา <b>${fmt(sumA)}</b> บาท</span><span class="stat">มูลค่าตามบัญชี <b>${fmt(sumB)}</b> บาท</span>`;
+  const ca=$('chkAll'); if (ca){ const act=st.filtered.filter(a=>a.status==='active'); const n=act.filter(a=>isPicked(a.bc)).length; ca.checked = act.length>0 && n===act.length; ca.indeterminate = n>0 && n<act.length; }
+}
+function refreshAll(){
+  const act = st.assets.filter(a=>a.status==='active').length;
+  $('pCount').textContent = `📦 อยู่ในทะเบียน ${fmtI(act)} รายการ`;
+  $('pAsOf').textContent = st.meta.fy ? `🗓️ ข้อมูลปีงบประมาณ ${st.meta.fy}` : (st.meta.asOf ? `🗓️ ข้อมูล ณ ${thaiFull(st.meta.asOf)}` : '🗓️ ยังไม่มีข้อมูล');
+  fillFilterOptions(); applyFilter(false); updateSelCount(); renderDispose(); renderLog(); renderSettings();
+}
+
+/* ---------- รายละเอียดรายการ ---------- */
+function showDetail(bc){
+  const a = st.byBc.get(bc); if (!a) return;
+  const s = st.sel[bc]; const age=ageYears(a.dsort);
+  const cp = v => v?`<button class="copy" data-copy="${esc(v)}">คัดลอก</button>`:'';
+  $('dlgT').textContent = a.name;
+  $('dlgB').innerHTML = `<dl class="kv">
+    <dt>เลขครุภัณฑ์</dt><dd><span class="code">${esc(a.asset)}</span>${cp(a.asset)}</dd>
+    <dt>เลขที่บาร์โค้ด</dt><dd>${esc(a.bc)}${cp(a.bc)}</dd>
+    <dt>รหัสสินค้าคงคลัง</dt><dd>${esc(a.inv||'-')}${cp(a.inv)}</dd>
+    <dt>ปีงบประมาณ</dt><dd>${esc(a.year||'-')}</dd>
+    <dt>จำนวน</dt><dd>${fmtI(a.qty)} ${esc(a.unit||'')}</dd>
+    <dt>วันที่โอนเป็นทุน</dt><dd>${sortToFull(a.dsort)}${age!==null?` (อายุประมาณ ${age.toFixed(1)} ปี)`:''}</dd>
+    <dt>ที่ตั้ง</dt><dd>${esc(a.loc||'-')}${a.room?' · ห้อง '+esc(a.room):''}</dd>
+    <dt>มูลค่าการได้มา</dt><dd>${fmt(a.acq)} บาท</dd>
+    <dt>มูลค่าตามบัญชี</dt><dd>${fmt(a.book)} บาท</dd>
+    <dt>สถานะ</dt><dd>${a.status==='disposed'?`<span class="bdg gone">จำหน่ายแล้ว</span> ${a.disposedDate?thaiFull(a.disposedDate):''} ${esc(a.disposedNote||'')}`:'<span class="bdg ok">อยู่ในทะเบียน</span>'}</dd>
+    <dt>เข้าทะเบียนในระบบ</dt><dd>${thaiFull(a.firstImport)} · ล่าสุดพบในไฟล์ ${thaiFull(a.lastImport)}</dd>
+    ${s&&st.admin?`<dt>การคัดเลือก</dt><dd>${s.on?'<span class="bdg sel">เลือกจำหน่าย</span>':''} ${esc([s.reason,s.method,s.remark].filter(Boolean).join(' · '))}</dd>`:''}
+  </dl>
+  ${st.admin && a.status==='active' ? `<div style="margin-top:14px;text-align:right"><button class="btn ${isPicked(bc)?'red':''}" id="dlgPick">${isPicked(bc)?'✖ เอาออกจากรายการจำหน่าย':'➕ เลือกเพื่อจำหน่าย'}</button></div>`:''}`;
+  $('dlgB').querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{ navigator.clipboard?.writeText(b.dataset.copy).then(()=>toast('📋 คัดลอกแล้ว: '+b.dataset.copy)).catch(()=>toast('คัดลอกไม่ได้ในเบราว์เซอร์นี้')); });
+  const dp=$('dlgPick'); if (dp) dp.onclick=()=>{ setSel(bc,{on:!isPicked(bc)}); dlg.close(); applyFilter(false); renderDispose(); };
+  dlg.showModal();
+}
+
+/* ---------- หน้าคัดเลือกจำหน่าย ---------- */
+function renderSigners(){
+  $('signers').innerHTML = st.settings.signers.map((s,i)=>`<div class="f"><label>${esc(s.label)}</label>
+    <input type="text" data-sg="${i}" data-f="name" value="${esc(s.name)}" placeholder="ชื่อ-นามสกุล">
+    <input type="text" data-sg="${i}" data-f="pos" value="${esc(s.pos)}" placeholder="ตำแหน่ง" style="margin-top:5px"></div>`).join('');
+}
+function renderDispose(){
+  const list = pickedList().sort((a,b)=>a.bc.localeCompare(b.bc));
+  const th=$('tDisp').querySelector('thead'), tb=$('tDisp').querySelector('tbody');
+  th.innerHTML = '<tr><th class="ctr">#</th><th>เลขครุภัณฑ์</th><th>รายการ</th><th>ปีงบ</th><th>วันที่ได้มา</th><th>ที่ตั้ง</th><th class="num">มูลค่าการได้มา</th><th class="num">มูลค่าตามบัญชี</th><th>สภาพ / เหตุผล</th><th>วิธีจำหน่ายที่เสนอ</th><th>หมายเหตุ</th><th></th></tr>';
+  if (!list.length){ tb.innerHTML = '<tr><td colspan="12" class="empty">ยังไม่ได้เลือกรายการ — ไปที่แท็บ “🔍 ค้นหาครุภัณฑ์” แล้วติ๊กช่องหน้ารายการที่ต้องการขอจำหน่าย</td></tr>'; }
+  else tb.innerHTML = list.map((a,i)=>{ const s=st.sel[a.bc]||{};
+    const opt=(arr,v)=>'<option value="">— เลือก —</option>'+arr.map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('');
+    return `<tr data-bc="${esc(a.bc)}" style="cursor:default">
+      <td class="ctr hide-m">${i+1}</td>
+      <td data-l="เลขครุภัณฑ์"><div class="code">${esc(a.asset)}</div><div class="code2">${esc(a.bc)}</div></td>
+      <td data-l="รายการ"><b>${esc(a.name)}</b><div class="code2">${fmtI(a.qty)} ${esc(a.unit||'')}</div></td>
+      <td data-l="ปีงบ">${esc(a.year)}</td><td data-l="วันที่ได้มา" style="white-space:nowrap">${esc(a.date)}</td>
+      <td data-l="ที่ตั้ง" style="min-width:150px">${esc(a.loc||'-')}</td>
+      <td data-l="มูลค่าการได้มา" class="num">${fmt(a.acq)}</td><td data-l="มูลค่าตามบัญชี" class="num">${fmt(a.book)}</td>
+      <td data-l="สภาพ"><select data-e="reason">${opt(REASONS,s.reason)}</select></td>
+      <td data-l="วิธีจำหน่าย"><select data-e="method">${opt(METHODS,s.method)}</select></td>
+      <td data-l="หมายเหตุ"><input type="text" data-e="remark" value="${esc(s.remark||'')}" placeholder="หมายเหตุ"></td>
+      <td><button class="btn red sm" data-rm="1" title="เอาออก">✖</button></td></tr>`; }).join('');
+  const sa=list.reduce((s,a)=>s+num(a.acq),0), sb=list.reduce((s,a)=>s+num(a.book),0);
+  const noReason = list.filter(a=>!(st.sel[a.bc]||{}).reason).length;
+  $('dStats').innerHTML = `<span class="stat">เลือก <b>${fmtI(list.length)}</b> รายการ</span><span class="stat">มูลค่าการได้มา <b>${fmt(sa)}</b></span><span class="stat">มูลค่าตามบัญชี <b>${fmt(sb)}</b></span>`+
+    (noReason&&list.length?`<span class="stat" style="border-color:#e0a100;background:var(--amber-bg);color:var(--amber)">⚠️ ยังไม่ระบุสภาพ ${fmtI(noReason)} รายการ</span>`:'');
+}
+
+/* ---------- นำเข้า Excel ---------- */
+const FIELDS = {
+  bc:['เลขที่บาร์โค้ด','เลขบาร์โค้ด','บาร์โค้ด','เลขตามบาร์โค้ท','เลขตามบาร์โค้ด','barcode'],
+  asset:['สินทรัพย์','เลขสินทรัพย์','เลขที่สินทรัพย์','เลขครุภัณฑ์','รหัสครุภัณฑ์','asset'],
+  sub:['เลขที่ย่อย','สินทรัพย์ย่อย','เลขย่อย','subnumber','sno.'],
+  inv:['เลขที่สินค้าคงคลัง','เลขสินค้าคงคลัง','รหัสสินค้าคงคลัง','inventorynumber','inventoryno.'],
+  name:['คำอธิบายสินทรัพย์','คำอธิบาย','ชื่อครุภัณฑ์','รายการ','description'],
+  year:['ปีงบประมาณ','ปีงบ'],
+  qty:['ปริมาณ','จำนวน','quantity'],
+  unit:['หน่วยนับ','หน่วย','unit'],
+  date:['วันที่โอนเป็นทุน','วันที่โอน','วันที่ได้มา','capitalizedon'],
+  loc:['ที่ตั้ง','สถานที่ตั้ง','location'],
+  room:['ห้อง','room'],
+  acq:['มูลค่าการได้มา','ราคาทุน','ราคาที่ได้มา','acquisitionvalue'],
+  book:['มูลค่าตามบัญชี','มูลค่าสุทธิ','bookvalue','มูลค่า'] };
+const norm = s => String(s??'').toLowerCase().replace(/[\s_\-]/g,'');
+function mapHeader(row){
+  const syn=[]; for (const [f,arr] of Object.entries(FIELDS)) for (const s of arr) syn.push([norm(s),f]);
+  syn.sort((a,b)=>b[0].length-a[0].length);
+  const map={}, used=new Set();
+  row.forEach((cell,ci)=>{ const h=norm(cell); if(!h) return;
+    let f=(syn.find(([s,ff])=>s===h && !used.has(ff))||[])[1];
+    if(!f) f=(syn.find(([s,ff])=>h.includes(s) && !used.has(ff))||[])[1];
+    if(f){ map[f]=ci; used.add(f); } });
+  return map;
+}
+function parseWorkbook(buf){
+  const wb = XLSX.read(buf,{type:'array'});
+  let best=null;
+  for (const sn of wb.SheetNames){
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:'',raw:true});
+    for (let i=0;i<Math.min(rows.length,25);i++){
+      const m=mapHeader(rows[i]); const sc=Object.keys(m).length;
+      if ((m.bc!==undefined||m.asset!==undefined) && m.name!==undefined && (!best||sc>best.score)) best={sheet:sn,rows,hr:i,map:m,score:sc};
+    }
+  }
+  let items=[], warn=[], mapInfo='';
+  if (best){
+    const {rows,hr,map}=best; const g=(r,f)=>map[f]===undefined?'':r[map[f]];
+    mapInfo = `ชีต “${best.sheet}” · หัวคอลัมน์แถวที่ ${hr+1} · พบคอลัมน์: `+Object.keys(map).map(f=>({bc:'บาร์โค้ด',asset:'สินทรัพย์',sub:'เลขย่อย',inv:'สินค้าคงคลัง',name:'คำอธิบาย',year:'ปีงบ',qty:'ปริมาณ',unit:'หน่วยนับ',date:'วันที่โอน',loc:'ที่ตั้ง',room:'ห้อง',acq:'มูลค่าการได้มา',book:'มูลค่าตามบัญชี'}[f])).join(', ');
+    for (let i=hr+1;i<rows.length;i++){ const r=rows[i]; if(!r) continue;
+      let bc=codeStr(g(r,'bc')), asset=codeStr(g(r,'asset'));
+      if (!bc && !asset) continue;
+      if (!asset && bc.length>=12) asset=bc.slice(0,12);
+      if (!bc){ const sub=digits(codeStr(g(r,'sub'))); bc = asset + (asset.length===12 ? (sub||'0').padStart(4,'0') : (sub?'-'+sub:'')); }
+      if (digits(asset).length<8) continue;
+      const dt=parseDate(g(r,'date'));
+      items.push({bc,asset,inv:codeStr(g(r,'inv')),name:String(g(r,'name')).trim(),year:codeStr(g(r,'year')),qty:num(g(r,'qty')),unit:String(g(r,'unit')).trim(),
+        date:dt.disp,dsort:dt.sort,loc:String(g(r,'loc')).trim(),room:String(g(r,'room')).trim(),acq:num(g(r,'acq')),book:num(g(r,'book'))});
+    }
+  } else {
+    /* รูปแบบเดิม (ไม่มีหัวคอลัมน์): A=รหัส B=ชื่อ C=ปริมาณ E=ที่ตั้ง F=ห้อง G=ปี H=วันที่โอน J=มูลค่า */
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:'',raw:true});
+    mapInfo='ไม่พบหัวคอลัมน์ — อ่านแบบรูปแบบเดิม (A=รหัส, B=ชื่อ, C=ปริมาณ, E=ที่ตั้ง, F=ห้อง, G=ปี, H=วันที่โอน, J=มูลค่า)';
+    for (const r of rows){ const asset=codeStr(r[0]); if(!/^\d{10,13}$/.test(asset)) continue; const dt=parseDate(r[7]);
+      items.push({bc:asset.length===12?asset+'0000':asset,asset,inv:'',name:String(r[1]).trim(),year:codeStr(r[6]),qty:num(r[2]),unit:'',date:dt.disp,dsort:dt.sort,loc:String(r[4]).trim(),room:String(r[5]).trim(),acq:0,book:num(r[9])}); }
+  }
+  const seen=new Set(), out=[];
+  for (const it of items){ if (seen.has(it.bc)){ warn.push(`เลขบาร์โค้ด ${it.bc} ซ้ำในไฟล์ — ใช้แถวแรก`); continue; } seen.add(it.bc); out.push(it); }
+  const noLoc = out.filter(x=>!x.loc).length; if (noLoc) warn.push(`มี ${fmtI(noLoc)} รายการที่ไม่ระบุที่ตั้งในไฟล์`);
+  return {items:out, warn, mapInfo};
+}
+const CMP = [['name','คำอธิบาย'],['inv','สินค้าคงคลัง'],['loc','ที่ตั้ง'],['room','ห้อง'],['qty','ปริมาณ'],['unit','หน่วยนับ'],['acq','มูลค่าการได้มา'],['book','มูลค่าตามบัญชี'],['year','ปีงบ'],['date','วันที่โอน']];
+function diffImport(items){
+  const inFile = new Map(items.map(x=>[x.bc,x]));
+  const added=[], changed=[], same=[], back=[], removed=[];
+  for (const it of items){
+    const o=st.byBc.get(it.bc);
+    if (!o){ added.push(it); continue; }
+    const ch = CMP.filter(([k])=> (['qty','acq','book'].includes(k) ? Math.abs(num(o[k])-num(it[k]))>0.004 : String(o[k]||'')!==String(it[k]||''))).map(([k,l])=>({k,l,from:o[k],to:it[k]}));
+    if (o.status==='disposed') back.push({it,o,ch}); else if (ch.length) changed.push({it,o,ch}); else same.push(it);
+  }
+  for (const o of st.assets) if (!inFile.has(o.bc)) removed.push(o);
+  return {added,changed,same,back,removed};
+}
+function onFile(file){
+  if (!file) return;
+  const rd=new FileReader();
+  rd.onload = e => {
+    try{
+      const res=parseWorkbook(new Uint8Array(e.target.result));
+      if (!res.items.length) throw new Error('ไม่พบรายการครุภัณฑ์ในไฟล์ — ตรวจว่ามีคอลัมน์ “สินทรัพย์” หรือ “เลขที่บาร์โค้ด” และ “คำอธิบายสินทรัพย์”');
+      st.pending = {file:file.name, ...res, diff:diffImport(res.items)};
+      renderPreview();
+    }catch(err){ $('impPreview').innerHTML = `<div class="box" style="background:var(--red-bg);color:var(--red);margin-top:14px"><b>อ่านไฟล์ไม่สำเร็จ:</b> ${esc(err.message)}</div>`; }
+  };
+  rd.readAsArrayBuffer(file);
+}
+function miniTable(list, extra){
+  if (!list.length) return '<div class="note">— ไม่มี —</div>';
+  const show=list.slice(0,300);
+  return `<div class="tbl-wrap" style="max-height:300px;margin-top:6px"><table class="grid mini"><thead><tr><th>เลขที่บาร์โค้ด</th><th>รายการ</th><th>ที่ตั้ง</th><th class="num">มูลค่าตามบัญชี</th>${extra?'<th>สิ่งที่เปลี่ยน</th>':''}</tr></thead><tbody>`+
+    show.map(x=>{ const a=x.it||x; return `<tr style="cursor:default"><td class="code2">${esc(a.bc)}</td><td>${esc(a.name)}</td><td>${esc(a.loc||'-')}</td><td class="num">${fmt(a.book)}</td>${extra?`<td>${(x.ch||[]).map(c=>`${c.l}: ${esc(['acq','book'].includes(c.k)?fmt(c.from):c.from||'-')} → <b>${esc(['acq','book'].includes(c.k)?fmt(c.to):c.to||'-')}</b>`).join('<br>')||'—'}</td>`:''}</tr>`; }).join('')+
+    `</tbody></table></div>${list.length>300?`<div class="note">แสดง 300 จาก ${fmtI(list.length)} รายการ</div>`:''}`;
+}
+function renderPreview(){
+  const p=st.pending;
+  if(!p){ $('impPreview').innerHTML='เลือกไฟล์ก่อน แล้วปุ่มยืนยันจะขึ้นตรงนี้'; return; }
+  const old=st.assets.length;
+  $('impPreview').innerHTML = `<div class="ok-file">📄 <b style="display:inline;margin:0">${esc(p.file)}</b><br>มี <b style="display:inline;margin:0">${fmtI(p.items.length)}</b> รายการ${old?` · แทนข้อมูลเดิม ${fmtI(old)} รายการ`:''}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn dark" id="impOk">✅ ยืนยันอัปโหลด</button><button class="btn light" id="impCancel">ยกเลิก</button></div>`;
+  $('impCancel').onclick=()=>{ st.pending=null; renderPreview(); $('file').value=''; };
+  $('impOk').onclick=commitImport;
+}
+/* ---------- สำเนาก่อนนำเข้า (เก็บใน IndexedDB ของเบราว์เซอร์ ย้อนกลับได้ 1 ครั้ง) ---------- */
+const SNAP_DB='culac_asset_snap';
+function snapDb(){ return new Promise((ok,no)=>{ const r=indexedDB.open(SNAP_DB,1); r.onupgradeneeded=()=>r.result.createObjectStore('s'); r.onsuccess=()=>ok(r.result); r.onerror=()=>no(r.error); }); }
+async function snapPut(v){ const db=await snapDb(); return new Promise((ok,no)=>{ const tx=db.transaction('s','readwrite'); v===null?tx.objectStore('s').delete('last'):tx.objectStore('s').put(v,'last'); tx.oncomplete=()=>ok(true); tx.onerror=()=>no(tx.error); }); }
+async function snapGet(){ const db=await snapDb(); return new Promise((ok,no)=>{ const r=db.transaction('s').objectStore('s').get('last'); r.onsuccess=()=>ok(r.result||null); r.onerror=()=>no(r.error); }); }
+async function commitImport(){
+  const p=st.pending; if(!p) return;
+  const fy=+$('impFy').value||fyDefault(), asOf=todayISO();
+  const old=st.assets.length;
+  if (old && !confirm(`ใช้ไฟล์ “${p.file}” เป็นข้อมูลปีงบประมาณ ${fy}\nข้อมูลเดิม ${fmtI(old)} รายการจะถูกแทนที่ (ย้อนกลับได้)\n\nยืนยันหรือไม่?`)) return;
+  let snapOk=false;
+  if (old){ try{ await snapPut({t:new Date().toISOString(), file:p.file, assets:st.assets.map(stripPriv), sel:st.sel, meta:st.meta}); snapOk=true; }catch(e){}
+    if (!snapOk && !confirm('เก็บสำเนาข้อมูลเดิมไม่สำเร็จ (จะย้อนกลับไม่ได้) — แนะนำกด “สำรอง / กู้คืน” ดาวน์โหลดไฟล์สำรองก่อน\n\nยังต้องการนำเข้าต่อหรือไม่?')) return; }
+  const d=p.diff, prevSel=st.sel, nb=new Set(p.items.map(x=>x.bc));
+  st.assets = p.items.map(it=>({...it,status:'active',lastImport:asOf,disposedDate:'',disposedNote:''}));
+  st.assets.sort((a,b)=>a.bc.localeCompare(b.bc));
+  st.sel = {}; for (const bc in prevSel) if (nb.has(bc)) st.sel[bc]=prevSel[bc];
+  st.meta.asOf=asOf; st.meta.fy=fy; st.meta.updated=new Date().toISOString();
+  st.log.forEach(l=>l.undo=false);
+  st.log.unshift({t:new Date().toISOString(), file:p.file, asOf, fy, total:p.items.length, added:d.added.length, deleted:old, undo:snapOk});
+  st.log=st.log.slice(0,200);
+  indexAssets(); saveLocal(); st.pending=null; renderPreview(); $('file').value='';
+  refreshAll();
+  toast(`✅ อัปโหลดเรียบร้อย — ปีงบประมาณ ${fy} · ${fmtI(p.items.length)} รายการ`,3000);
+  if (st.gas) await pushAll();
+}
+async function undoImport(){
+  let snap=null; try{ snap=await snapGet(); }catch(e){}
+  if (!snap) return alert('ไม่พบสำเนาข้อมูลเดิมในเครื่องนี้ — ใช้เมนู “สำรองข้อมูล” กู้คืนจากไฟล์สำรองแทน');
+  if (!confirm(`ย้อนกลับไปใช้ข้อมูลเดิม ${fmtI(snap.assets.length)} รายการ (ก่อนอัปโหลด “${snap.file}”) ยืนยันหรือไม่?`)) return;
+  st.assets=snap.assets; st.sel=snap.sel||{}; st.meta=snap.meta||{asOf:''};
+  if (st.log[0]) { st.log[0].undo=false; st.log[0].undone=new Date().toISOString(); }
+  try{ await snapPut(null); }catch(e){}
+  indexAssets(); saveLocal(); refreshAll(); toast('↩️ ย้อนกลับเป็นข้อมูลเดิมแล้ว',3000);
+  if (st.gas) await pushAll();
+}
+function renderLog(){
+  if (!$('impLog')) return;
+  if (!st.log.length){ $('impLog').innerHTML='ยังไม่มีประวัติ'; return; }
+  $('impLog').onclick=e=>{ if(e.target.id==='btnUndo') undoImport(); };
+  $('impLog').innerHTML = `<div class="tbl-wrap" style="max-height:260px"><table class="grid mini"><thead><tr><th>วันที่อัปโหลด</th><th>ปีงบประมาณ</th><th>ไฟล์</th><th class="num">จำนวนรายการ</th><th></th></tr></thead><tbody>`+
+    st.log.map(l=>{ const t=new Date(l.t); return `<tr style="cursor:default"><td>${thaiFull(l.t.slice(0,10))} ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}</td><td>${l.fy||'-'}</td><td>${esc(l.file)}</td><td class="num">${fmtI(l.total)}</td><td>${l.undo?'<button class="btn red sm" id="btnUndo">↩️ ย้อนกลับ</button>':(l.undone?'<span class="bdg gone">ย้อนกลับแล้ว</span>':'')}</td></tr>`; }).join('')+'</tbody></table></div>';
+}
+
+/* ---------- Excel ---------- */
+function exportXlsx(list, name, withSel){
+  const head=['ลำดับ','เลขที่บาร์โค้ด','สินทรัพย์','เลขที่สินค้าคงคลัง','คำอธิบายสินทรัพย์','ปีงบประมาณ','ปริมาณ','หน่วยนับ','วันที่โอนเป็นทุน','ที่ตั้ง','ห้อง','มูลค่าการได้มา','มูลค่าตามบัญชี','สถานะ'].concat(withSel?['สภาพ/เหตุผล','วิธีจำหน่ายที่เสนอ','หมายเหตุ']:[]);
+  const aoa=[head].concat(list.map((a,i)=>{ const s=st.sel[a.bc]||{}; return [i+1,a.bc,a.asset,a.inv,a.name,a.year,num(a.qty),a.unit,a.date,a.loc,a.room,num(a.acq),num(a.book),a.status==='disposed'?'จำหน่ายแล้ว':'อยู่ในทะเบียน'].concat(withSel?[s.reason||'',s.method||'',s.remark||'']:[]); }));
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  for (let r=1;r<aoa.length;r++) for (const c of [1,2,3]){ const ref=XLSX.utils.encode_cell({r,c}); if (ws[ref]) { ws[ref].t='s'; ws[ref].z='@'; } }
+  for (let r=1;r<aoa.length;r++) for (const c of [11,12]){ const ref=XLSX.utils.encode_cell({r,c}); if (ws[ref]) ws[ref].z='#,##0.00'; }
+  ws['!cols']=[6,18,14,19,48,10,8,9,13,30,10,15,15,13,22,18,24].map(w=>({wch:w}));
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'ครุภัณฑ์'); XLSX.writeFile(wb,name);
+}
+function downloadTemplate(){
+  const ws=XLSX.utils.aoa_to_sheet([['เลขที่บาร์โค้ด','สินทรัพย์','เลขที่สินค้าคงคลัง','คำอธิบายสินทรัพย์','ปีงบประมาณ','ปริมาณ','หน่วยนับ','วันที่โอนเป็นทุน','ที่ตั้ง','มูลค่าการได้มา','มูลค่าตามบัญชี']]);
+  ws['!cols']=[18,14,19,48,10,8,9,14,30,15,15].map(w=>({wch:w}));
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'บัญชีครุภัณฑ์'); XLSX.writeFile(wb,'v27_Template_ทะเบียนครุภัณฑ์.xlsx');
+}
+
+/* ---------- พิมพ์ A4 ---------- */
+function filterDesc(){
+  const parts=[]; const q=$('q').value.trim(); if(q) parts.push(`คำค้น “${q}”`);
+  const l=$('fLoc').value; if(l && l!=='*') parts.push('ที่ตั้ง '+(l==='__none__'?'(ไม่ระบุ)':l));
+  if(val('fY1')) parts.push(`ปีงบประมาณที่ได้มา ${val('fY1')}`);
+  if(val('fAge')) parts.push(`อายุ ${val('fAge')} ปีขึ้นไป`);
+  if(val('fBook')) parts.push('มูลค่าตามบัญชี'+$('fBook').selectedOptions[0].text);
+  if(val('fStat')&&val('fStat')!=='active') parts.push($('fStat').selectedOptions[0].text);
+  if(!parts.length) parts.push('ทุกรายการในทะเบียน');
+  return parts.join(' · ');
+}
+function dataLabel(){ return st.meta.fy ? `ข้อมูลทะเบียนปีงบประมาณ ${st.meta.fy}` : `ข้อมูลทะเบียน ณ ${st.meta.asOf?thaiFull(st.meta.asOf):'-'}`; }
+function logoTag(){ return `<img class="rpt-logo" src="${$('logoImg').src}" alt="CULAC">`; }
+function doPrint(html){ $('printArea').innerHTML=html; setTimeout(()=>window.print(),80); }
+function printSearch(){
+  const L=st.filtered; if(!L.length) return toast('ไม่มีรายการให้พิมพ์');
+  const sa=L.reduce((s,a)=>s+num(a.acq),0), sb=L.reduce((s,a)=>s+num(a.book),0);
+  doPrint(`<div class="rpt"><div class="rpt-head">${logoTag()}<div class="rpt-org">ศูนย์สัตว์ทดลอง จุฬาลงกรณ์มหาวิทยาลัย</div><div class="rpt-title">รายงานทะเบียนครุภัณฑ์</div>
+    <div class="rpt-sub">${esc(filterDesc())}</div></div><div class="rpt-line"></div>
+    <div class="rpt-meta"><span>${dataLabel()}</span><span>พิมพ์เมื่อ ${thaiFull(todayISO())}</span></div>
+    <table class="rpt-t"><colgroup><col style="width:4%"><col style="width:12%"><col style="width:11%"><col style="width:23%"><col style="width:5%"><col style="width:6%"><col style="width:7%"><col style="width:14%"><col style="width:9%"><col style="width:9%"></colgroup>
+    <thead><tr><th>ลำดับ</th><th>เลขครุภัณฑ์ / บาร์โค้ด</th><th>รหัสสินค้าคงคลัง</th><th>รายการ</th><th>ปีงบ</th><th>จำนวน</th><th>วันที่ได้มา</th><th>ที่ตั้ง</th><th>มูลค่าการได้มา (บาท)</th><th>มูลค่าตามบัญชี (บาท)</th></tr></thead><tbody>`+
+    L.map((a,i)=>`<tr><td style="text-align:center">${i+1}</td><td>${esc(a.asset)}<br><span style="font-size:8pt">${esc(a.bc)}</span></td><td style="font-size:8pt">${esc(a.inv||'-')}</td><td>${esc(a.name)}${a.status==='disposed'?' <b>(จำหน่ายแล้ว)</b>':''}</td><td style="text-align:center">${esc(a.year)}</td><td style="text-align:center">${fmtI(a.qty)} ${esc(a.unit)}</td><td style="text-align:center">${esc(a.date)}</td><td>${esc(a.loc||'-')}${a.room?' ห้อง '+esc(a.room):''}</td><td style="text-align:right">${fmt(a.acq)}</td><td style="text-align:right">${fmt(a.book)}</td></tr>`).join('')+
+    `<tr class="tot"><td colspan="8" style="text-align:right">รวม ${fmtI(L.length)} รายการ</td><td style="text-align:right">${fmt(sa)}</td><td style="text-align:right">${fmt(sb)}</td></tr></tbody></table></div>`);
+}
+function printDispose(){
+  let L=pickedList().sort((a,b)=>a.bc.localeCompare(b.bc)); if(!L.length) return toast('ยังไม่ได้เลือกรายการ');
+  const grp=$('grpLoc').checked; if (grp) L.sort((a,b)=>(a.loc||'').localeCompare(b.loc||'','th')||a.bc.localeCompare(b.bc));
+  const sa=L.reduce((s,a)=>s+num(a.acq),0), sb=L.reduce((s,a)=>s+num(a.book),0); const S=st.settings;
+  let body='', lastLoc=null, n=0;
+  for (const a of L){ const s=st.sel[a.bc]||{};
+    if (grp && a.loc!==lastLoc){ const g=L.filter(x=>x.loc===a.loc); body+=`<tr class="grp"><td colspan="9">📍 ${esc(a.loc||'(ไม่ระบุที่ตั้ง)')} — ${fmtI(g.length)} รายการ</td><td style="text-align:right">${fmt(g.reduce((t,x)=>t+num(x.acq),0))}</td><td style="text-align:right">${fmt(g.reduce((t,x)=>t+num(x.book),0))}</td><td colspan="3"></td></tr>`; lastLoc=a.loc; }
+    body+=`<tr><td style="text-align:center">${++n}</td><td>${esc(a.asset)}<br><span style="font-size:8pt">${esc(a.bc)}</span></td><td>${esc(a.name)}</td><td style="text-align:center">${esc(a.year)}</td><td style="text-align:center">${fmtI(a.qty)}</td><td style="text-align:center">${esc(a.unit)}</td><td style="text-align:center">${esc(a.date)}</td><td>${esc(a.loc||'-')}${a.room?' ห้อง '+esc(a.room):''}</td><td style="text-align:center">${ageYears(a.dsort)?Math.floor(ageYears(a.dsort)):'-'}</td><td style="text-align:right">${fmt(a.acq)}</td><td style="text-align:right">${fmt(a.book)}</td><td>${esc(s.reason||'')}</td><td>${esc(s.method||'')}</td><td>${esc(s.remark||'')}</td></tr>`; }
+  doPrint(`<div class="rpt"><div class="rpt-head">${logoTag()}<div class="rpt-org">ศูนย์สัตว์ทดลอง จุฬาลงกรณ์มหาวิทยาลัย</div><div class="rpt-title">${esc(S.title)}</div><div class="rpt-sub">${esc(S.round)}</div></div><div class="rpt-line"></div>
+    <div class="rpt-meta"><span>${dataLabel()}</span><span>จำนวน ${fmtI(L.length)} รายการ</span></div>
+    <table class="rpt-t"><colgroup><col style="width:4%"><col style="width:10.5%"><col style="width:15%"><col style="width:4.5%"><col style="width:4.5%"><col style="width:5%"><col style="width:6.5%"><col style="width:11%"><col style="width:4%"><col style="width:9%"><col style="width:8%"><col style="width:6.5%"><col style="width:6.5%"><col style="width:5%"></colgroup>
+    <thead><tr><th>ที่</th><th>เลขครุภัณฑ์ / บาร์โค้ด</th><th>รายการ</th><th>ปีงบ</th><th>จำนวน</th><th>หน่วยนับ</th><th>วันที่ได้มา</th><th>ที่ตั้ง</th><th>อายุ (ปี)</th><th>มูลค่าการได้มา (บาท)</th><th>มูลค่าตามบัญชี (บาท)</th><th>สภาพ / เหตุผล</th><th>วิธีจำหน่ายที่เสนอ</th><th>หมาย<br>เหตุ</th></tr></thead>
+    <tbody>${body}<tr class="tot"><td colspan="9" style="text-align:right">รวมทั้งสิ้น ${fmtI(L.length)} รายการ</td><td style="text-align:right">${fmt(sa)}</td><td style="text-align:right">${fmt(sb)}</td><td colspan="3"></td></tr></tbody></table>
+    <div class="rpt-sign">${S.signers.map(g=>`<div><div class="ln">ลงชื่อ ......................................................</div><div>(${esc(g.name||'......................................................')})</div><div>${esc(g.pos||'ตำแหน่ง ...........................................')}</div><div><b>${esc(g.label)}</b></div><div>วันที่ ........./........./.........</div></div>`).join('')}</div></div>`);
+}
+
+/* ---------- หน้า ตั้งค่า / สำรอง ---------- */
+function renderSettings(){
+  $('sTitle').value=st.settings.title; $('sRound').innerHTML=fyOptions(st.settings.fy||(String(st.settings.round).match(/25\d\d/)||[fyDefault()])[0]); renderSigners();
+  if ($('gasUrl')) $('gasUrl').value = lsGet(LS.gas,'') || DEFAULT_GAS_URL;
+  if ($('impFy') && !$('impFy').options.length) $('impFy').innerHTML = fyOptions(st.meta.fy ? Math.min(st.meta.fy+1, FY_LIST[FY_LIST.length-1]) : fyDefault());
+}
+function backup(){
+  const blob=new Blob([JSON.stringify({ver:VER,exported:new Date().toISOString(),assets:st.assets.map(stripPriv),sel:st.sel,settings:st.settings,log:st.log,meta:st.meta})],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`v27_สำรองทะเบียนครุภัณฑ์_${todayISO()}.json`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+function restore(file){
+  const rd=new FileReader(); rd.onload=async e=>{ try{ const j=JSON.parse(e.target.result); if(!Array.isArray(j.assets)) throw 0;
+    if(!confirm(`กู้คืน ${fmtI(j.assets.length)} รายการ จากไฟล์สำรองวันที่ ${thaiFull((j.exported||'').slice(0,10))} — ข้อมูลปัจจุบันจะถูกแทนที่ ยืนยันหรือไม่?`)) return;
+    st.assets=j.assets; st.sel=j.sel||{}; st.settings=Object.assign(defaultSettings(),j.settings||{}); st.log=j.log||[]; st.meta=j.meta||{asOf:''};
+    indexAssets(); saveLocal(); refreshAll(); toast('✅ กู้คืนเรียบร้อย'); if(st.gas) await pushAll(); }catch(err){ alert('ไฟล์สำรองไม่ถูกต้อง'); } };
+  rd.readAsText(file);
+}
+
+/* ---------- เริ่มทำงาน ---------- */
+function switchTab(p){
+  if (!document.getElementById('pg-'+p)) p='search';      // บุคลากรทั่วไปเข้าหน้าผู้ดูแลไม่ได้
+  document.querySelectorAll('.tab[data-p]').forEach(t=>t.classList.toggle('on',t.dataset.p===p));
+  document.querySelectorAll('.page').forEach(s=>s.classList.toggle('on',s.id==='pg-'+p));
+  if (p==='dispose') renderDispose();
+  if (p==='gas') $('gasUrl').value = lsGet(LS.gas,'') || DEFAULT_GAS_URL;
+  window.scrollTo(0,0);
+}
+function bind(){
+  $('tabs').onclick=e=>{ const b=e.target.closest('.tab[data-p]'); if(b) switchTab(b.dataset.p); };
+  if ($('btnLogout')) $('btnLogout').onclick=()=>{ try{ sessionStorage.removeItem(AUTH_KEY); sessionStorage.removeItem(AUTH_PW); }catch(_){}; location.replace(location.pathname); };
+  let qT; $('q').addEventListener('input',()=>{ clearTimeout(qT); qT=setTimeout(()=>applyFilter(),160); });
+  ['fLoc','fY1','fAge','fBook','fStat'].forEach(id=>{ if($(id)) $(id).addEventListener('change',()=>applyFilter()); });
+  $('btnReset').onclick=()=>{ $('q').value=''; ['fY1','fAge','fBook'].forEach(id=>{ if($(id)) $(id).value=''; }); $('fLoc').value='*'; if($('fStat')) $('fStat').value='active'; applyFilter(); $('q').focus(); };
+  $('more').onclick=e=>{ if(e.target.id==='btnMore'){ st.shown+=PAGE; renderSearch(); } };
+  $('tSearch').addEventListener('click',e=>{
+    const th=e.target.closest('th.s'); if(th){ const k=th.dataset.k; st.sort = st.sort.key===k?{key:k,dir:-st.sort.dir}:{key:k,dir:['acq','book','date','year'].includes(k)?-1:1}; sortFiltered(); renderSearch(); return; }
+    if (e.target.id==='chkAll'){ const on=e.target.checked; const act=st.filtered.filter(a=>a.status==='active');
+      if (on && act.length>100 && !confirm(`เลือกทั้งหมด ${fmtI(act.length)} รายการที่แสดงผลอยู่ ใช่หรือไม่?`)){ e.target.checked=false; return; }
+      act.forEach(a=>{ const cur=st.sel[a.bc]||{on:false,reason:'',method:'',remark:''}; cur.on=on; cur.t=Date.now(); if(!cur.on&&!cur.remark&&!cur.reason&&!cur.method) delete st.sel[a.bc]; else st.sel[a.bc]=cur; });
+      saveLocal('sel'); if(st.gas) gasPost({action:'saveSel',items:Object.fromEntries(act.map(a=>[a.bc,st.sel[a.bc]||null]))}); updateSelCount(); renderSearch(); toast(on?`✅ เลือก ${fmtI(act.length)} รายการ`:'ยกเลิกการเลือกแล้ว'); return; }
+    if (e.target.classList.contains('pick')){ setSel(e.target.dataset.bc,{on:e.target.checked}); e.target.closest('tr').classList.toggle('picked',e.target.checked); renderSearch(); return; }
+    const tr=e.target.closest('tbody tr[data-bc]'); if(tr) showDetail(tr.dataset.bc);
+  });
+  $('tDisp').addEventListener('change',e=>{ const tr=e.target.closest('tr[data-bc]'); const k=e.target.dataset.e; if(tr&&k){ setSel(tr.dataset.bc,{[k]:e.target.value}); renderDisposeStatsOnly(); } });
+  $('tDisp').addEventListener('click',e=>{ if(e.target.dataset.rm){ const bc=e.target.closest('tr').dataset.bc; setSel(bc,{on:false}); renderDispose(); applyFilter(false); } });
+  $('signers').addEventListener('input',e=>{ const i=e.target.dataset.sg; if(i!==undefined){ st.settings.signers[i][e.target.dataset.f]=e.target.value; saveLocal('settings'); queueSettings(); } });
+  $('sTitle').oninput=e=>{ st.settings.title=e.target.value; saveLocal('settings'); queueSettings(); };
+  $('sRound').onchange=e=>{ st.settings.fy=+e.target.value; st.settings.round='ประจำปีงบประมาณ '+e.target.value; saveLocal('settings'); queueSettings(); };
+  $('btnXlsSearch').onclick=()=>{ if(!st.filtered.length) return toast('ไม่มีรายการ'); exportXlsx(st.filtered,`v27_ทะเบียนครุภัณฑ์_${todayISO()}.xlsx`,false); };
+  $('btnXlsDisp').onclick=()=>{ const L=pickedList(); if(!L.length) return toast('ยังไม่ได้เลือกรายการ'); exportXlsx(L,`v27_บัญชีขอจำหน่ายครุภัณฑ์_${todayISO()}.xlsx`,true); };
+  $('btnPrintSearch').onclick=printSearch; $('btnPrintDisp').onclick=printDispose;
+  $('btnClearSel').onclick=()=>{ const L=pickedList(); if(!L.length) return; if(!confirm(`ยกเลิกการเลือกทั้งหมด ${fmtI(L.length)} รายการ (สภาพ/วิธี/หมายเหตุ จะถูกล้างด้วย) ยืนยันหรือไม่?`)) return;
+    const items={}; L.forEach(a=>{ delete st.sel[a.bc]; items[a.bc]=null; }); saveLocal('sel'); if(st.gas) gasPost({action:'saveSel',items}); updateSelCount(); renderDispose(); applyFilter(false); toast('ล้างรายการที่เลือกแล้ว'); };
+  $('btnMarkDisp').onclick=async()=>{ const L=pickedList(); if(!L.length) return toast('ยังไม่ได้เลือกรายการ');
+    const ref=prompt(`บันทึกว่า ${fmtI(L.length)} รายการนี้ “จำหน่ายแล้ว”\nใส่เลขที่หนังสืออนุมัติ / หมายเหตุ (ไม่บังคับ):`,''); if(ref===null) return;
+    const d=todayISO(); const items={}; L.forEach(a=>{ a.status='disposed'; a.disposedDate=d; a.disposedNote=ref||'บันทึกจำหน่ายจากระบบ'; delete st.sel[a.bc]; items[a.bc]=null; });
+    indexAssets(); saveLocal(); refreshAll(); toast(`✅ บันทึกจำหน่ายแล้ว ${fmtI(L.length)} รายการ`); if(st.gas) await pushAll(); };
+  if ($('pg-import')){
+  const drop=$('drop'); ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
+  drop.addEventListener('drop',e=>onFile(e.dataTransfer.files[0]));
+  $('file').onchange=e=>onFile(e.target.files[0]);
+  $('btnTpl').onclick=downloadTemplate;
+  $('btnBackup').onclick=backup; $('restoreFile').onchange=e=>{ if(e.target.files[0]) restore(e.target.files[0]); e.target.value=''; };
+  $('btnGasSave').onclick=async()=>{ const u=$('gasUrl').value.trim(); lsSet(LS.gas,u); st.gas=u; if(!u){ $('gasMsg').textContent='เลิกเชื่อม Sheet แล้ว — ใช้ข้อมูลในเครื่องนี้'; setSync('💾 เก็บในเครื่องนี้'); return; }
+    $('gasMsg').textContent='⏳ กำลังทดสอบ…'; try{ const r=await fetch(u+'?action=ping&t='+Date.now()); const j=await r.json(); if(!j.ok) throw 0;
+      $('gasMsg').innerHTML=`✅ เชื่อมต่อได้ · ใน Sheet มี ${fmtI(j.count||0)} รายการ${(j.count||0)===0&&st.assets.length?' — กด “ส่งข้อมูลในเครื่องขึ้น Sheet” เพื่อเริ่มใช้':''}`; if(j.count) gasLoad(); else setSync('☁️ เชื่อม Google Sheet แล้ว'); }
+    catch(e){ $('gasMsg').textContent='❌ เชื่อมต่อไม่ได้ — ตรวจ URL และสิทธิ์ “ทุกคน” ตอน Deploy'; } };
+  $('btnGasPush').onclick=async()=>{ if(!st.gas) return toast('ใส่ URL และกดบันทึกก่อน'); if(!st.assets.length) return toast('ยังไม่มีข้อมูลในเครื่อง');
+    if(!confirm(`ส่งข้อมูล ${fmtI(st.assets.length)} รายการขึ้น Google Sheet (แทนที่ข้อมูลใน Sheet) ยืนยันหรือไม่?`)) return; if(await pushAll()) toast('☁️ ส่งขึ้น Sheet เรียบร้อย'); };
+  }
+}
+function renderDisposeStatsOnly(){ const list=pickedList(); const noReason=list.filter(a=>!(st.sel[a.bc]||{}).reason).length;
+  const sa=list.reduce((s,a)=>s+num(a.acq),0), sb=list.reduce((s,a)=>s+num(a.book),0);
+  $('dStats').innerHTML = `<span class="stat">เลือก <b>${fmtI(list.length)}</b> รายการ</span><span class="stat">มูลค่าการได้มา <b>${fmt(sa)}</b></span><span class="stat">มูลค่าตามบัญชี <b>${fmt(sb)}</b></span>`+
+    (noReason?`<span class="stat" style="border-color:#e0a100;background:var(--amber-bg);color:var(--amber)">⚠️ ยังไม่ระบุสภาพ ${fmtI(noReason)} รายการ</span>`:''); }
+
+(function init(){
+  st.gas = (lsGet(LS.gas,'') || DEFAULT_GAS_URL).trim();
+  const qs = new URLSearchParams(location.search);
+  /* โหมดผู้ดูแล: ต้องใส่รหัสผู้ดูแล (กด 🔒 ท้ายหน้า) — จำไว้จนกว่าจะปิดเบราว์เซอร์หรือกดออกจากระบบ */
+  st.admin = isAuthed();
+  if (!st.admin){ document.querySelectorAll('.adm,.admopt').forEach(el=>el.remove()); document.body.classList.add('staff'); }
+  st.assets = lsGet(LS.assets,[]); st.sel=lsGet(LS.sel,{}); st.log=lsGet(LS.log,[]); st.meta=lsGet(LS.meta,{asOf:'',updated:''});
+  st.settings = Object.assign(defaultSettings(), lsGet(LS.settings,{}));
+  let migrated=false; if (!st.assets.length) migrated = migrateV18();
+  indexAssets(); if (migrated) saveLocal();
+  bind(); refreshAll();
+  if (st.gas) gasLoad(); else setSync('💾 เก็บในเครื่องนี้');
+  if (migrated) toast('📦 นำข้อมูลจากเวอร์ชันเดิมมาให้แล้ว — แนะนำนำเข้าไฟล์ทะเบียนล่าสุดอีกครั้ง',4000);
+  if (st.admin) $('lnkLogin').remove();
+  $('lnkLogin') && ($('lnkLogin').onclick=()=>{ $('pwIn').value=''; $('pwMsg').textContent=''; $('dlgLogin').showModal(); setTimeout(()=>$('pwIn').focus(),50); });
+  $('frmLogin').onsubmit=async e=>{ e.preventDefault(); const h=await sha256('culac-asset|'+$('pwIn').value);
+    if (h===ADMIN_HASH){ try{ sessionStorage.setItem(AUTH_KEY,h); sessionStorage.setItem(AUTH_PW,$('pwIn').value); }catch(_){}; location.reload(); }
+    else { $('pwMsg').textContent='❌ รหัสไม่ถูกต้อง'; $('pwIn').select(); } };
+  if (st.admin && !st.assets.length) switchTab('import');
+  else { switchTab('search'); $('q').focus(); }
+})();
+</script>
+</body>
+</html>
